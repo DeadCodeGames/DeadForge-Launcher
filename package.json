@@ -1,6 +1,6 @@
 {
   "name": "deadforge",
-  "version": "v0.0.0Fix",
+  "version": "v0.0.0RPC",
   "description": "An Electron Launcher for DeadCode Projects.",
   "main": "main.js",
   "scripts": {
@@ -18,8 +18,8 @@
     "appId": "dev.deadcode.forge",
     "productName": "DeadForge",
     "win": {
-        "target": "nsis",
-        "artifactName": "dev.deadcode.forge-${version}.${ext}"
+      "target": "nsis",
+      "artifactName": "dev.deadcode.forge-${version}.${ext}"
     },
     "mac": {
       "target": "dmg",
@@ -31,6 +31,7 @@
     }
   },
   "dependencies": {
-    "@electron/remote": "^2.1.2"
+    "@electron/remote": "^2.1.2",
+    "discord-rpc": "^4.0.1"
   }
 }
