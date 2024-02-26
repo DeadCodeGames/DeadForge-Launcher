@@ -1,4 +1,6 @@
 const { app, BrowserWindow, shell } = require('electron');
+require('@electron/remote/main').initialize()
+
 
 const createWindow = () => {
   const mainWindow = new BrowserWindow({
@@ -10,16 +12,13 @@ const createWindow = () => {
     contextisolation: true,
     nodeIntegration: true,
     titleBarStyle: 'hidden',
-    titleBarOverlay: {
-      color: '#161616',
-      symbolColor: '#F0F0F0',
-      height: 40
-    },
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false
     }
   });
+
+  require("@electron/remote/main").enable(mainWindow.webContents);
 
   mainWindow.loadFile('index.html');
 

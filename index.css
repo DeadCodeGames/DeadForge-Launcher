@@ -21,6 +21,20 @@ div#window {
     flex-wrap: nowrap;
 }
 
+div#window>div#controls, div#window>div#controls>* {
+    -webkit-app-region: no-drag;
+    color: white;
+    font-size: 16px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    cursor: pointer;
+}
+
+div#window>div#controls>*:not(:last-child) {
+    margin-right: 5px;
+}
+
 div#window>div#titleleft {
     display: flex;
     flex-direction: row;
