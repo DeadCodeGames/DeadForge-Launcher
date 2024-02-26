@@ -14,9 +14,7 @@
     "url": "github.com/DeadCodeGames/DeadForge-Launcher"
   },
   "devDependencies": {
-    "electron": "^29.0.1"
-  },
-  "dependencies": {
+    "electron": "^29.0.1",
     "electron-builder": "^24.12.0"
   }
 }
