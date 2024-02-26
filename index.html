@@ -1,0 +1,32 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="index.css" />
+        <title>× deadforge ×</title>
+    </head>
+    <body>
+        <div id="window">
+            <div id="titleleft">
+                <div id="windowlogo">××</div><div id="windowtitle">deadforge</div>
+            </div>
+        </div>
+        <div id="app">
+            <div id="sidebar">
+                <div id="sidebartop">
+                    <div id="website" onclick="document.querySelector('#content').setAttribute('current', 'website')">
+                        <div class="material-symbols-outlined">web</div>
+                        <div class="sidebarlabel">WEBSITE</div>
+                    </div>
+                </div>
+                <div id="sidebarbottom">
+                    <div id="collapse" onclick="document.querySelector('#sidebar').classList.toggle('collapsed')">
+                        <div class="material-symbols-outlined">menu</div>
+                        <div class="sidebarlabel">COLLAPSE</div>
+                    </div>
+                </div>
+            </div>
+            <div id="content">
+                <iframe id="webiFrame" title="× deadcode ×" src="https://deadcode.is-a.dev"></iframe>
+            </div>
+        </div>
+    </body>
+</html>

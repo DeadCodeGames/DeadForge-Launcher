@@ -1,0 +1,19 @@
+{
+  "name": "deadforge",
+  "version": "0.0.0",
+  "description": "An Electron Launcher for DeadCode Projects.",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "keywords": [],
+  "author": "DeadCodeGames",
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "github.com/DeadCodeGames/DeadForge-Launcher"
+  },
+  "devDependencies": {
+    "electron": "^29.0.1"
+  }
+}
