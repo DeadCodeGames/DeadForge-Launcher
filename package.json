@@ -1,17 +1,33 @@
 {
   "name": "deadforge",
-  "version": "0.0.0",
+  "version": "v0.0.0",
   "description": "An Electron Launcher for DeadCode Projects.",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
   "keywords": [],
-  "author": "DeadCodeGames",
+  "author": "DeadCodeGames <404@mail.deadcode.is-a.dev> (https://deadcode.is-a.dev)",
   "license": "BSD-3-Clause",
   "repository": "github:DeadCodeGames/DeadForge-Launcher",
   "devDependencies": {
     "electron": "^29.0.1",
     "electron-builder": "^24.12.0"
+  },
+  "build": {
+    "appId": "dev.deadcode.forge",
+    "productName": "DeadForge",
+    "win": {
+        "target": "nsis",
+        "artifactName": "dev.deadcode.forge-${version}.${ext}"
+    },
+    "mac": {
+      "target": "dmg",
+      "artifactName": "dev.deadcode.forge-${version}.${ext}"
+    },
+    "linux": {
+      "target": "deb",
+      "artifactName": "dev.deadcode.forge-${version}.${ext}"
+    }
   }
 }
