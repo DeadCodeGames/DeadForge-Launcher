@@ -181,7 +181,15 @@ iframe#webiFrame {
     height: 100%;
 }
 
-section#webcontents {
+section {
+    display: none;
+}
+
+section#web {
     width: 100%;
     height: 100%;
+}
+
+div#content[current="web"]>section#web {
+    display: block;
 }
