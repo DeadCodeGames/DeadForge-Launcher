@@ -1,24 +1,9 @@
-name: Build and Release
+name: Build/release
 
-on:
-  push:
-    branches:
-      - main
+on: push
 
 jobs:
-
-  get_version:
-    runs-on: ubuntu-latest
-
-    outputs:
-      version: ${{ steps.set_version.outputs.version }}
-
-    steps:
-      - id: set_version
-        run: echo ::set-output name=version::$(node -pe "require('./package.json').version")
-
-
-  build:
+  release:
     runs-on: ${{ matrix.os }}
 
     strategy:
@@ -26,24 +11,22 @@ jobs:
         os: [macos-latest, ubuntu-latest, windows-latest]
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v2
+      - name: Check out Git repository
+        uses: actions/checkout@v1
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
+      - name: Install Node.js, NPM and Yarn
+        uses: actions/setup-node@v1
         with:
-          node-version: '20'
+          node-version: 20
 
-      - name: Install dependencies
-        run: npm install
-
-      - name: Build app
-        run: npm run build
-
-      - name: Release app
-        uses: softprops/action-gh-release@v1
+      - name: Build/release Electron app
+        uses: samuelmeuli/action-electron-builder@v1
         with:
-          files: dist/*
-          token: ${{ secrets.build_token }}
-          tag_name: v${{ steps.get_version.outputs.version }}
-          body: Automated release
+          # GitHub token, automatically provided to the action
+          # (No need to define this secret in the repo settings)
+          github_token: ${{ secrets.build_token }}
+
+          # If the commit is tagged with a version (e.g. "v1.0.0"),
+          # release the app after building
+          release: ${{ startsWith(github.ref, 'refs/tags/v') }}
+          args: --publish onTagOrDraft
