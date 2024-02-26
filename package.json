@@ -9,10 +9,7 @@
   "keywords": [],
   "author": "DeadCodeGames",
   "license": "BSD-3-Clause",
-  "repository": {
-    "type": "git",
-    "url": "github.com/DeadCodeGames/DeadForge-Launcher"
-  },
+  "repository": "github:DeadCodeGames/DeadForge-Launcher",
   "devDependencies": {
     "electron": "^29.0.1",
     "electron-builder": "^24.12.0"
