@@ -8,12 +8,24 @@
         <link rel="icon" type="image/x-icon" href="/images/logos/favicon.ico">
         <link rel="stylesheet" href="/fonts/Uni Sans/stylesheet.css">
         <link rel="stylesheet" href="/fonts/Montserrat/stylesheet.css">
+
+        <link rel="preload" as="image" href="img/windows.png">
+        <link rel="preload" as="image" href="img/linux.png">
+        <link rel="preload" as="image" href="img/macos.png">
+        <link rel="preload" as="image" href="img/windowsdisabled.png">
+        <link rel="preload" as="image" href="img/linuxdisabled.png">
+        <link rel="preload" as="image" href="img/macosdisabled.png">
     </head>
     <body>
         <hero>
             <heading>DeadForge</heading>
             <subheading>A launcher by DeadCode</subheading>
             <a id="downloadbutton"><downloadbutton disabled="">Download</downloadbutton></a>
+            <downloadbuttonsarray disabled>
+                <a id="downloadwin"><downloadbuttonsmall disabled></downloadbuttonsmall></a>
+                <a id="downloadlinux"><downloadbuttonsmall disabled></downloadbuttonsmall></a>
+                <a id="downloadmac"><downloadbuttonsmall disabled></downloadbuttonsmall></a>
+            </downloadbuttonsarray>
         </hero>
     </body>
     <script src="index.js"></script>

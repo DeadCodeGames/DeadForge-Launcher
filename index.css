@@ -56,3 +56,44 @@ a#downloadbutton {
     top: 20px;
     position: relative;
 }
+
+downloadbuttonsmall {
+    transition: background-image 0.5s ease-in-out;
+    width: 75px;
+    height: 75px;
+    display: block;
+    background-size: contain;
+    border-radius: 16px;
+}
+
+downloadbuttonsarray {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    position: relative;
+    top: 40px;
+    width: 333px;
+    transition: width 0.5s ease-in-out;
+    & a#downloadwin>downloadbuttonsmall {
+        background-image: url("img/windows.png");
+    }
+    & a#downloadlinux>downloadbuttonsmall {
+        background-image: url("img/linux.png");
+    }
+    & a#downloadmac>downloadbuttonsmall {
+        background-image: url("img/macos.png");
+    }
+    & a#downloadwin>downloadbuttonsmall[disabled] {
+        background-image: url("img/windowsdisabled.png");
+    }
+    & a#downloadlinux>downloadbuttonsmall[disabled] {
+        background-image: url("img/linuxdisabled.png");
+    }
+    & a#downloadmac>downloadbuttonsmall[disabled] {
+        background-image: url("img/macosdisabled.png");
+    }
+}
+
+downloadbuttonsarray[disabled] {
+    width: 275px;
+}
