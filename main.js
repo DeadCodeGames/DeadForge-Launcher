@@ -43,7 +43,7 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit();
 });
 
-var version, clientID = "1211721853324890143", rpc = new DiscordRPC.Client({ transport: 'ipc' }), startTime = new Date();
+var version, clientID = "1211721853324890143", rpc = null, startTime = new Date();
 fs.readFile(path.join(__dirname, 'package.json'), 'utf8', (err, data) => {
   if (err) {
     console.error(err);
@@ -70,8 +70,24 @@ async function setActivity() {
   });
 }
 
-rpc.on('ready', () => {
-  setActivity();
-});
 
-rpc.login({ clientId: clientID }).catch(console.error);
+
+
+function connectRPC() {
+  if (rpc) {
+    rpc.destroy();
+  }
+
+  rpc = new DiscordRPC.Client({ transport: 'ipc' });
+
+  rpc.on('ready', () => {
+    setActivity();
+  });
+
+  rpc.login({ clientId: clientID }).catch(err => {
+    console.error('Failed to connect to Discord:', err);
+    setTimeout(connectRPC, 5 * 1000); // Retry connection after 15 seconds
+  });
+}
+
+connectRPC()
