@@ -1,0 +1,58 @@
+hero {
+    background: black;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    perspective: 1000px;
+}
+
+heading {
+    color: white;
+    font-family: "Uni Sans CAPS";
+    font-weight: bold;
+    font-size: 128px;
+}
+
+subheading {
+    color: white;
+    font-family: "Uni Sans CAPS";
+    font-weight: normal;
+    font-size: 32px;
+}
+
+body {
+    margin: 0;
+}
+
+downloadbutton {
+    border-radius: 16px;
+    height: 75px;
+    width: 333px;
+    background: white;
+    color: black;
+    font-size: 24px;
+    font-family: 'Uni Sans CAPS';
+    font-weight: bold;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    transition: width 0.5s ease-in-out, background 0.5s ease-in-out, color 0.5s ease-in-out
+}
+
+downloadbutton[disabled] {
+    background: #666;
+    color: #333;
+    width: 275px;
+}
+
+a#downloadbutton {
+    all: unset;
+    text-decoration: none;
+    cursor: pointer;
+    top: 20px;
+    position: relative;
+}
