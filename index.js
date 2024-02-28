@@ -1,4 +1,5 @@
 const { BrowserWindow } = require('@electron/remote');
+const { ipcRenderer } = require('electron');
 
 const minimizeBtn = document.querySelector("div#window>div#controls>div#minimize");
 const maximizeBtn = document.querySelector("div#window>div#controls>div#maximize");
@@ -24,4 +25,10 @@ maximizeBtn.addEventListener('click', () => {
 closeBtn.addEventListener('click', () => {
   const window = BrowserWindow.getFocusedWindow();
   window.close();
+});
+
+ipcRenderer.on('updateStatus', (event, status) => {
+  // Update the status attribute in your UI based on the received status
+  const statusElement = document.querySelector('div#updatestatus');
+  statusElement.setAttribute('status', status);
 });

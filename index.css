@@ -207,3 +207,41 @@ section#web {
 div#content[current="web"]>section#web {
     display: block;
 }
+
+div#updatestatus[status="checking"]::after {
+    content: "sync";
+}
+
+div#updatestatus[status="downloading"]::after {
+    content: "downloading";
+}
+
+div#updatestatus[status="downloaded"]::after {
+    content: "download_done";
+}
+
+div#updatestatus[status="uptodate"]::after {
+    content: "check";
+    opacity: 0;
+    transition: opacity 5s linear 10s;
+}
+
+div#updatestatus[status="fail"]::after {
+    content: "sync_problem";
+    animation: fail 1s steps(1) 0s infinite normal;
+}
+
+@keyframes fail {
+    0% {
+        opacity: 1
+    }
+    50%{
+        opacity: 0
+    }
+}
+
+div#updatestatus::after {
+    margin-left: 5px;
+    color: #f0f0f0;
+    opacity: 1;
+}
