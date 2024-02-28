@@ -1,3 +1,4 @@
+const logo = document.querySelector('a#logo');
 const heading = document.querySelector('heading');
 const subheading = document.querySelector('subheading');
 const button = document.querySelector('downloadbutton');
@@ -11,6 +12,7 @@ document.addEventListener('mousemove', (e) => {
     const offsetX = (window.innerWidth / 2 - e.clientX) * 0.05; // Adjust the factor to control the movement intensity
     const offsetY = (window.innerHeight / 2 - e.clientY) * 0.05; // Adjust the factor to control the movement intensity
         
+    logo.style.transform = `translate(${offsetX * 0.75}px, ${offsetY * 0.75}px)`;
     heading.style.transform = `translate(${offsetX}px, ${offsetY}px)`;
     subheading.style.transform = `translate(${offsetX * 1.5}px, ${offsetY * 1.5}px)`; // Adjust the factor for faster movement
     buttonlink.style.transform = `translate(${offsetX * 2}px, ${offsetY * 2}px)`;

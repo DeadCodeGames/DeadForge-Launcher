@@ -9,6 +9,17 @@ hero {
     perspective: 1000px;
 }
 
+a#logo {
+    position: absolute;
+    top: 250px;
+    color: white;
+    font-family: "Montserrat";
+    font-weight: bold;
+    font-size: 64px;
+    text-align: center;
+    text-decoration: none;
+}
+
 heading {
     color: white;
     font-family: "Uni Sans CAPS";
