@@ -2,7 +2,6 @@
 
 body {
     margin: 0;
-    background: #2a2a2a;
 }
 
 div#window {
@@ -10,7 +9,6 @@ div#window {
     left: 0;
     position: absolute;
     height: 40px;
-    background: #161616;
     width: -webkit-fill-available;
     display: flex;
     justify-content: space-between;
@@ -23,7 +21,6 @@ div#window {
 
 div#window>div#controls, div#window>div#controls>* {
     -webkit-app-region: no-drag;
-    color: white;
     font-size: 16px;
     display: flex;
     flex-direction: row;
@@ -42,7 +39,6 @@ div#window>div#titleleft {
 }
 
 div#window>div#titleleft>div#windowlogo {
-    color: #F0F0F0;
     font-family: 'Montserrat';
     font-size: 24px;
     font-weight: 700;
@@ -57,7 +53,6 @@ div#window>div#titleleft>div#windowlogo {
 }
 
 div#window>div#titleleft>div#windowtitle {
-    color: #F0F0F0;
     font-family: 'Uni Sans CAPS', 'Montserrat';
     font-size: 14px;
     font-weight: 700;
@@ -75,8 +70,6 @@ div#app>div#sidebar {
     left: 0;
     width: 240px;
     height: -webkit-fill-available;
-    background: #161616;
-    color: #F0F0F0;
     transition: width 0.5s ease-in-out;
     padding: 10px 0 15px 10px;
     display: flex;
@@ -96,7 +89,6 @@ div#app>div#sidebar::after {
     width: 25px;
     left: 250px;
     border-top-left-radius: 25px;
-    box-shadow: 0 -25px 0 0 #161616;
     transition: left 0.5s ease-in-out;
     z-index: -1;
 }
@@ -111,16 +103,10 @@ div#app>div#sidebar.collapsed::after {
 
 div#app>div#sidebar div.material-symbols-outlined {
     font-size: 24px;
-    color: #F0F0F0;
     cursor: pointer;
     width: 30px;
     text-align: center;
     padding: 0 10px 0 0;
-}
-
-div#app>div#sidebar div#collapse, div#app>div#sidebar div#collapse * {
-    cursor: pointer;
-    transition: color 0.5s ease-in-out, opacity 0.5s ease-in-out;
 }
 
 div#app>div#sidebar div.sidebarlabel {
@@ -147,9 +133,6 @@ div#app:has(div#sidebar.collapsed) {
     div#app>div#sidebar::after {
         left: 50px;
     }
-    div#app>div#sidebar div#collapse>div.material-symbols-outlined {
-        color: #424242;
-    }
     div#app>div#sidebar div#collapse {
         pointer-events: none !important;
     }
@@ -166,6 +149,22 @@ div#app>div#sidebar>*>* {
     flex-direction: row;
     align-items: center;
     overflow: hidden;
+    white-space: nowrap;
+}
+
+div#app>div#sidebar>* {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    width: fit-content;
+}
+
+div#app>div#sidebar>div#sidebarbottom>:not(:last-child) {
+    margin-bottom: 15px;
+}
+
+div#app>div#sidebar>div#sidebartop>:not(:last-child) {
+    margin-top: 15px;
 }
 
 div#app>div#sidebar.collapsed div.sidebarlabel{
@@ -226,6 +225,10 @@ div#updatestatus[status="uptodate"]::after {
     transition: opacity 5s linear 10s;
 }
 
+div#updatestatus[status="appnotloaded"]::after {
+    content: "pending";
+}
+
 div#updatestatus[status="fail"]::after {
     content: "sync_problem";
     animation: fail 1s steps(1) 0s infinite normal;
@@ -242,6 +245,100 @@ div#updatestatus[status="fail"]::after {
 
 div#updatestatus::after {
     margin-left: 5px;
-    color: #f0f0f0;
     opacity: 1;
+}
+
+html.dark {
+    body {
+        background: #2a2a2a;
+    }
+
+    div#window {
+        background: #161616;
+    }
+
+    div#window>div#controls, div#window>div#controls>* {
+        color: white;
+    }
+
+    div#window>div#titleleft>* {
+        color: #F0F0F0;
+    }
+
+    div#app>div#sidebar {
+        background: #161616;
+        color: #F0F0F0; 
+    }
+    
+    div#app>div#sidebar::after {
+        box-shadow: 0 -25px 0 0 #161616;
+    }
+
+    div#app>div#sidebar div.material-symbols-outlined {
+        color: #F0F0F0;
+    }
+
+    div#app>div#sidebar div#switchColorMode {
+        & div.material-symbols-outlined::after {
+            content: "light_mode"
+        }
+
+        & div.sidebarlabel::after {
+            content: "LIGHT MODE";
+        }
+    }
+}
+
+@media screen and (max-width: 600px) {
+    html.dark div#app>div#sidebar div#collapse>div.material-symbols-outlined {
+        color: #424242;
+    };
+}
+
+
+html.light {
+    body {
+        background: #D5D5D5;
+    }
+
+    div#window {
+        background: #E9E9E9;
+    }
+
+    div#window>div#controls, div#window>div#controls>* {
+        color: black;
+    }
+
+    div#window>div#titleleft>* {
+        color: #0F0F0F;
+    }
+
+    div#app>div#sidebar {
+        background: #E9E9E9;
+        color: #0F0F0F; 
+    }
+    
+    div#app>div#sidebar::after {
+        box-shadow: 0 -25px 0 0 #E9E9E9;
+    }
+
+    div#app>div#sidebar div.material-symbols-outlined {
+        color: #0F0F0F;
+    }
+
+    div#app>div#sidebar div#switchColorMode {
+        & div.material-symbols-outlined::after {
+            content: "dark_mode"
+        }
+
+        & div.sidebarlabel::after {
+            content: "DARK MODE";
+        }
+    }
+}
+
+@media screen and (max-width: 600px) {
+    html.light div#app>div#sidebar div#collapse>div.material-symbols-outlined {
+        color: #BDBDBD;
+    }
 }

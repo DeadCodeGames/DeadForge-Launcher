@@ -6,11 +6,8 @@ const maximizeBtn = document.querySelector("div#window>div#controls>div#maximize
 const closeBtn = document.querySelector("div#window>div#controls>div#close");
 
 minimizeBtn.addEventListener('click', () => {
-    console.log("minimizing");
     const window = BrowserWindow.getFocusedWindow();
-    console.log(window);
     window.minimize();
-    console.log("minimized");
 });
 
 maximizeBtn.addEventListener('click', () => {
@@ -28,7 +25,27 @@ closeBtn.addEventListener('click', () => {
 });
 
 ipcRenderer.on('updateStatus', (event, status) => {
-  // Update the status attribute in your UI based on the received status
   const statusElement = document.querySelector('div#updatestatus');
   statusElement.setAttribute('status', status);
+});
+
+function updateColorPreference() {
+  if (document.querySelector("html").classList.contains("light")) {
+    document.querySelector("html").classList.remove("light");
+    document.querySelector("html").classList.add("dark");
+  } else {
+    document.querySelector("html").classList.remove("dark");
+    document.querySelector("html").classList.add("light");
+  }
+  sendColorPreference();
+}
+
+function sendColorPreference() {
+  ipcRenderer.send('color-preference', document.querySelector('html').classList.contains('dark') ? 'dark' : 'light');
+}
+
+ipcRenderer.on('preferences', (event, preferencesData) => {
+  const preferences = JSON.parse(preferencesData);
+  document.querySelector('html').classList.remove('light', 'dark');
+  document.querySelector('html').classList.add(preferences.colorScheme);
 });

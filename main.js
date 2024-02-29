@@ -1,13 +1,11 @@
-const { app, BrowserWindow, shell, dialog } = require('electron');
+const { app, BrowserWindow, shell, dialog, ipcMain } = require('electron');
 require('@electron/remote/main').initialize()
 const DiscordRPC = require('discord-rpc');
 const path = require('node:path');
 const axios = require('axios');
 const fs = require('fs');;
 
-let mainWindow, updateStatus = (status) => {
-  mainWindow.webContents.send('updateStatus', status);
-};
+let mainWindow, updateStatus = (status) => { mainWindow.webContents.send('updateStatus', status); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -28,6 +26,9 @@ const createWindow = () => {
 
   require("@electron/remote/main").enable(mainWindow.webContents);
 
+  mainWindow.setBackgroundMaterial("acrylic");
+  mainWindow.setBackgroundColor("#161616");
+
   mainWindow.loadFile('index.html');
 
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
@@ -38,9 +39,17 @@ const createWindow = () => {
 app.whenReady().then(() => {
   createWindow()
   setTimeout(() => {
+    fs.readFile(path.join(__dirname, 'preferences.json'), 'utf8', (err, data) => {
+      if (err) {
+          console.error('Error reading preferences file:', err);
+          return;
+      }
+
+      mainWindow.webContents.send('preferences', data);
+  });
     checkUpdates()
     setInterval(checkUpdates, 10 * 60 * 1000);
-  }, 1000)
+  }, 2500)
 
 
   app.on('activate', function () {
@@ -52,7 +61,6 @@ app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit();
 });
 
-console.log(BrowserWindow.getAllWindows())
 
 var version, clientID = "1211721853324890143", rpc = null, startTime = new Date();
 fs.readFile(path.join(__dirname, 'package.json'), 'utf8', (err, data) => {
@@ -61,8 +69,7 @@ fs.readFile(path.join(__dirname, 'package.json'), 'utf8', (err, data) => {
     return;
   }
   const JSONData = JSON.parse(data)
-  // handle the json data here
-  console.log(JSONData.version);
+
   version = JSONData.version;
 });
 
@@ -97,7 +104,7 @@ function connectRPC() {
 
   rpc.login({ clientId: clientID }).catch(err => {
     console.error('Failed to connect to Discord:', err);
-    setTimeout(connectRPC, 5 * 1000); // Retry connection after 15 seconds
+    setTimeout(connectRPC, 5 * 1000);
   });
 }
 
@@ -150,7 +157,6 @@ async function checkUpdates() {
     else if (platform == "mac") { installerPath = path.join(path.dirname(path.dirname(path.dirname(__dirname))), 'update.dmg'); writer = fs.createWriteStream(installerPath); }
     else if (platform == "linux") { installerPath = path.join(path.dirname(path.dirname(path.dirname(__dirname))), 'update.deb'); writer = fs.createWriteStream(installerPath); }
 
-    console.log(installerPath);
     updateStatus('downloading');
   
     const response = await axios({
@@ -168,4 +174,25 @@ async function checkUpdates() {
   }
 
   await downloadUpdate().then(() => {updateStatus('downloaded'); showInstallDialog()}).catch(err => { updateStatus('fail'); console.error(err) });
+}
+
+
+var preference = {
+  colorScheme: 'dark'
+};
+
+ipcMain.on('color-preference', (event, colorPreference) => {
+  preference.colorScheme = colorPreference;
+  writePreferences()
+});
+
+function writePreferences() {
+  const jsonData = JSON.stringify(preference, null, 2);
+
+  fs.writeFile(path.join(__dirname, 'preferences.json'), jsonData, 'utf8', (err) => {
+    if (err) {
+      console.error('preferences', err);
+      return;
+    }
+  }); 
 }

@@ -1,4 +1,4 @@
-<html>
+<html class="dark">
     <head>
         <link rel="stylesheet" href="index.css" />
         <title>× deadforge ×</title>
@@ -6,7 +6,7 @@
     <body>
         <div id="window">
             <div id="titleleft">
-                <div id="windowlogo">××</div><div id="windowtitle">deadforge</div><div id="updatestatus" class="material-symbols-outlined"></div>
+                <div id="windowlogo">××</div><div id="windowtitle">deadforge</div><div id="updatestatus" class="material-symbols-outlined" status="appnotloaded"></div>
             </div>
             <div id="controls">
                 <div id="minimize" class="material-symbols-outlined">minimize</div>
@@ -23,6 +23,10 @@
                     </div>
                 </div>
                 <div id="sidebarbottom">
+                    <div id="switchColorMode" onclick="updateColorPreference()">
+                        <div class="material-symbols-outlined"></div>
+                        <div class="sidebarlabel"></div>
+                    </div>
                     <div id="collapse" onclick="document.querySelector('#sidebar').classList.toggle('collapsed')">
                         <div class="material-symbols-outlined">menu</div>
                         <div class="sidebarlabel">COLLAPSE</div>
