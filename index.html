@@ -9,7 +9,7 @@
                 <div id="windowlogo">××</div><div id="windowtitle">deadforge</div><div id="updatestatus" class="material-symbols-outlined" status="appnotloaded"></div>
             </div>
             <div id="controls">
-                <div id="minimize" class="material-symbols-outlined">minimize</div>
+                <div id="minimize" class="material-symbols-outlined">horizontal_rule</div>
                 <div id="maximize" class="material-symbols-outlined">square</div>
                 <div id="close" class="material-symbols-outlined">close</div>
             </div>
@@ -20,6 +20,10 @@
                     <div id="website" onclick="document.querySelector('#content').setAttribute('current', 'web')">
                         <div class="material-symbols-outlined">web</div>
                         <div class="sidebarlabel">WEBSITE</div>
+                    </div>
+                    <div id="library" onclick="document.querySelector('#content').setAttribute('current', 'library')">
+                        <div class="material-symbols-outlined">joystick</div>
+                        <div class="sidebarlabel">LIBRARY</div>
                     </div>
                 </div>
                 <div id="sidebarbottom">
@@ -56,17 +60,56 @@
                             </settingsoption>
                             <settingsoption>
                                 <label for="StartupSwitch">Run DeadForge on Startup</label>
-                                <input type="checkbox" id="StartupSwitch" switch="true">
+                                <input type="checkbox" id="StartupSwitch" switch="false">
                                 <label for="StartupSwitch" switchlabel></label>
+                                <br compatlayer>
+                            </settingsoption>
+                            <settingsoption>
+                                <label for="BetaSwitch">Enable Beta Updates (Pre-Release Tags on GitHub)</label>
+                                <input type="checkbox" id="BetaSwitch" switch="false">
+                                <label for="BetaSwitch" switchlabel></label>
                                 <br compatlayer>
                             </settingsoption>
                         </div>
                         <div class="settingsmaincontentbox">
                             <settingsheading>Credits</settingsheading>
                             <hr>
-                            <span>This Launcher has been developed by kanshen.click (from Team DeadCode). Special thanks to Qlexc (<b><a href="https://github.com/MusicOnStereo" target="_blank">@MusicOnStereo</a></b>) for helping with async issues, you are amazing!<br><br><kaomoji>  ႔ ႔<br>ᠸ^ ^  <</kaomoji></span>
+                            <creditsline>
+                                <creditbanner>
+                                    <creditpfp><img src="https://github.com/RichardKanshen.png"></creditpfp>
+                                    <creditinfo>
+                                        <creditname>kanshen <logo>××</logo></creditname>
+                                        <credittype>Developer</credittype>
+                                    </creditinfo>
+                                </creditbanner>
+                                <creditbanner>
+                                    <creditpfp><img src="https://github.com/MusicOnStereo.png"></creditpfp>
+                                    <creditinfo>
+                                        <creditname>Qlexc (<b><a href="https://github.com/MusicOnStereo" target="_blank">@MusicOnStereo</a></b>)</creditname>
+                                        <credittype>JavaScript God™</credittype>
+                                    </creditinfo>
+                                </creditbanner>
+                            </creditsline>
+                            <br>
+                            <span><kaomoji>  ႔ ႔<br>ᠸ^ ^  <</kaomoji></span>
                         </div>
                     </div>
+                </section>
+                <section id="library">
+                    <gamesection id="con">
+                        <blank><button class="disabled">Coming 2024</button></blank>
+                        <info>
+                            <div class="gametitle">ConRPG</div>
+                            <div class="gamesubtitle">An RPG in your Terminal, made with C++</div>
+                        </info>
+                    </gamesection>
+                    <gamesection id="restorebackup">
+                        <blank><a href="https://deadcode.is-a.dev/RestoreBackup" target="_blank"><button class="disabled">Coming 2025</button></a></blank>
+                        <info>
+                            <div class="gametitle">RestoreBackup?</div>
+                            <div class="gamesubtitle">That computer is hiding a lot more than what is on the surface.</div>
+                        </info>
+                    </gamesection>
                 </section>
             </div>
         </div>
