@@ -2,6 +2,15 @@
 
 html:has(div#updatestatus[status="appnotloaded"]){
     pointer-events: none;
+    opacity: 0;
+}
+
+html:not(:has(div#updatestatus[status="appnotloaded"])) {
+    opacity: 1;
+}
+
+html {
+    transition: opacity 0.5s ease-in-out;
 }
 
 body {
@@ -18,7 +27,7 @@ div#window {
     justify-content: space-between;
     align-items: center;
     -webkit-app-region: drag;
-    padding: 0 10px;
+    padding: 0 0 0 10px;
     flex-direction: row;
     flex-wrap: nowrap;
 }
@@ -30,10 +39,9 @@ div#window>div#controls, div#window>div#controls>* {
     flex-direction: row;
     align-items: center;
     cursor: pointer;
-}
-
-div#window>div#controls>*:not(:last-child) {
-    margin-right: 5px;
+    height: 100%;
+    text-align: center;
+    justify-content: center;
 }
 
 div#window>div#titleleft {
@@ -121,7 +129,7 @@ div#app:has(div#sidebar.collapsed) {
     --sidebarwidth: 50px;
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 750px) {
     div#app>div#sidebar {
         width: 40px !important;
     }
@@ -158,7 +166,7 @@ div#app>div#sidebar>div#sidebarbottom>:not(:last-child) {
     margin-bottom: 15px;
 }
 
-div#app>div#sidebar>div#sidebartop>:not(:last-child) {
+div#app>div#sidebar>div#sidebartop>:not(:first-child) {
     margin-top: 15px;
 }
 
@@ -208,6 +216,12 @@ div#content[current="web"]>section#web {
 }
 
 div#content[current="settings"]>section#settings {
+    display: block;
+    height: 100%;
+    overflow-y: auto;
+}
+
+div#content[current="library"]>section#library {
     display: block;
     height: 100%;
     overflow-y: auto;
@@ -270,6 +284,10 @@ html.dark {
     div#window>div#controls, div#window>div#controls>* {
         color: white;
     }
+
+	div#controls>div#minimize:hover, div#controls>div#maximize:hover {
+	    background-color: rgba(255, 255, 255, 0.25)
+	}
 
     div#window>div#titleleft>* {
         color: #F0F0F0;
@@ -355,7 +373,7 @@ html.dark {
     }
 }
 
-@media screen and (max-width: 600px) {
+@media screen and (max-width: 750px) {
     html.dark div#app>div#sidebar div#collapse>div.material-symbols-outlined {
         color: #424242;
     };
@@ -374,6 +392,10 @@ html.light {
     div#window>div#controls, div#window>div#controls>* {
         color: black;
     }
+
+	div#controls>div#minimize:hover, div#controls>div#maximize:hover {
+	    background-color: rgba(0, 0, 0, 0.25)
+	}
 
     div#window>div#titleleft>* {
         color: #0F0F0F;
@@ -644,4 +666,120 @@ html.light {
         background-color: #E9E9E9;
         opacity: 0.5;
     }
+}
+
+gamesection {
+    height: 425px;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Montserrat';
+    color: #F0F0F0;
+    align-items: center;
+    justify-content: flex-end;
+    border-radius: 15px 15px 64px 64px;
+    overflow: hidden;
+}
+
+section#library>gamesection>info>div.gametitle {
+    font-size: 40px;
+    font-weight: bold;
+}
+
+section#library>gamesection>info>div.gamesubtitle {
+    font-size: 16px;
+}
+
+section#library>gamesection>blank {
+    height: -webkit-fill-available;
+    width: calc(100% - 50px);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-end;
+    padding: 25px;
+}
+
+section#library>gamesection#con {
+    background: url(./res/CONRPG.banner.png);
+    background-position: center 65%;
+    background-size: cover;
+}
+
+section#library>gamesection#restorebackup {
+    background: url(./res/RESTOREBACKUP.banner.png);
+    background-position: center 65%;
+    background-size: cover;
+}
+
+info {
+    text-align: center;
+    height: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+}
+
+info>* {
+    width: 100%;
+    text-align: center;
+}
+
+info::before {
+    background-image: linear-gradient(360deg, rgba(0,0,0,0.75), transparent);
+    height: 50px;
+    width: 100%;
+    content: ""
+}
+
+info>:first-child {
+    background-image: linear-gradient(180deg, rgba(0,0,0,0.75), black);
+}
+
+info>:not(:first-child) {
+    background: black;
+}
+
+info::after {
+    width: 100%;
+    background: black;
+    content: "";
+    height: 42px;
+}
+
+section#library>gamesection:not(:last-child) {margin-bottom: 30px;}
+
+gamesection button {
+    all: unset;
+    color: #0F0F0F;
+    background: #F0F0F0;
+    width: 150px;
+    height: 75px;
+    border-radius: 15px;
+    font-family: 'Uni Sans CAPS';
+    font-weight: bold;
+    text-align: center;
+}
+
+gamesection button.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+gamesection a {
+    text-decoration: none;
+}
+
+div#window>div#controls>* {
+    height: 100%;
+    aspect-ratio: 1;
+}
+
+div#controls>div#close:hover {
+    background-color: red
+}
+
+div#controls>* {
+    transition: background 0.125s ease-in-out
 }

@@ -9,7 +9,7 @@ let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
-    minWidth: 500,
+    minWidth: 555,
     minHeight: 350,
     height: 600,
     width: 800,
@@ -111,7 +111,9 @@ function connectRPC() {
 
 async function checkUpdates() {
   updateStatus({"status": "checking", "current": version});
-  var JS = await fetch("https://api.github.com/repos/DeadCodeGames/DeadForge/releases").then(response => response.json()).catch(err => { updateStatus({"status": "fail", "current": version, "latest": undefined, "failType": "check"}); console.error(err) }), assets, downloadLinksByOS = {}, platform, latestversion, installerPath;
+  var JS = await fetch("https://api.github.com/repos/DeadCodeGames/DeadForge/releases").then(response => response.json()).catch(err => { updateStatus({ "status": "fail", "current": version, "latest": undefined, "failType": "check" }); console.error(err) }), assets, downloadLinksByOS = {}, platform, latestversion, installerPath;
+  const downloadsFolder = require('downloads-folder');
+
 
   assets = JS[0].assets;
   latestversion = JS[0].tag_name;
@@ -152,9 +154,9 @@ async function checkUpdates() {
 
   async function downloadUpdate() {
     var writer;
-    if (platform == "windows") { installerPath = path.join(path.dirname(path.dirname(path.dirname(__dirname))), 'update.exe'); writer = fs.createWriteStream(installerPath); }
-    else if (platform == "mac") { installerPath = path.join(path.dirname(path.dirname(path.dirname(__dirname))), 'update.dmg'); writer = fs.createWriteStream(installerPath); }
-    else if (platform == "linux") { installerPath = path.join(path.dirname(path.dirname(path.dirname(__dirname))), 'update.deb'); writer = fs.createWriteStream(installerPath); }
+    if (platform == "windows") { installerPath = path.join(downloadsFolder(), 'update.exe'); writer = fs.createWriteStream(installerPath); }
+    else if (platform == "mac") { installerPath = path.join(downloadsFolder(), 'update.dmg'); writer = fs.createWriteStream(installerPath); }
+    else if (platform == "linux") { installerPath = path.join(downloadsFolder(), 'update.deb'); writer = fs.createWriteStream(installerPath);}
 
     updateStatus({"status": "downloading", "current": version, "latest": latestversion});
   
