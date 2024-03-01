@@ -1,3 +1,5 @@
 {
-  "colorScheme": "dark"
+  "colorScheme": "dark",
+  "discordRPC": true,
+  "startup": false
 }

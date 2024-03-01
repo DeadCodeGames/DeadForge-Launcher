@@ -5,7 +5,7 @@ const path = require('node:path');
 const axios = require('axios');
 const fs = require('fs');;
 
-let mainWindow, updateStatus = (status) => { mainWindow.webContents.send('updateStatus', status); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }
+let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -19,7 +19,7 @@ const createWindow = () => {
     titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
     }
   });
 
@@ -46,6 +46,7 @@ app.whenReady().then(() => {
       }
 
       mainWindow.webContents.send('preferences', data);
+      JSON.parse(data).discordRPC ? connectRPC() : null;
   });
     checkUpdates()
     setInterval(checkUpdates, 10 * 60 * 1000);
@@ -108,16 +109,14 @@ function connectRPC() {
   });
 }
 
-connectRPC()
-
 async function checkUpdates() {
-  updateStatus('checking');
-  var JS = await fetch("https://api.github.com/repos/DeadCodeGames/DeadForge/releases").then(response => response.json()).catch(err => { updateStatus('fail'); console.error(err) }), assets, downloadLinksByOS = {}, platform, latestversion, installerPath;
+  updateStatus({"status": "checking", "current": version});
+  var JS = await fetch("https://api.github.com/repos/DeadCodeGames/DeadForge/releases").then(response => response.json()).catch(err => { updateStatus({"status": "fail", "current": version, "latest": undefined, "failType": "check"}); console.error(err) }), assets, downloadLinksByOS = {}, platform, latestversion, installerPath;
 
   assets = JS[0].assets;
   latestversion = JS[0].tag_name;
 
-  if (latestversion == version) {updateStatus('uptodate'); return};
+  if (latestversion == version) {updateStatus({"status": "uptodate", "current": version}); return};
 
   assets.forEach(asset => {
     const fileName = asset.name.toLowerCase();
@@ -157,7 +156,7 @@ async function checkUpdates() {
     else if (platform == "mac") { installerPath = path.join(path.dirname(path.dirname(path.dirname(__dirname))), 'update.dmg'); writer = fs.createWriteStream(installerPath); }
     else if (platform == "linux") { installerPath = path.join(path.dirname(path.dirname(path.dirname(__dirname))), 'update.deb'); writer = fs.createWriteStream(installerPath); }
 
-    updateStatus('downloading');
+    updateStatus({"status": "downloading", "current": version, "latest": latestversion});
   
     const response = await axios({
       url: downloadLinksByOS[platform],
@@ -169,20 +168,35 @@ async function checkUpdates() {
   
     return new Promise((resolve, reject) => {
       writer.on('finish', resolve);
-      writer.on('error', () => { reject;  updateStatus('fail');});
+      writer.on('error', () => { reject; updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); });
     });
   }
 
-  await downloadUpdate().then(() => {updateStatus('downloaded'); showInstallDialog()}).catch(err => { updateStatus('fail'); console.error(err) });
+  await downloadUpdate().then(() => {updateStatus({'status': 'downloaded', 'current': version, 'latest': latestversion}); showInstallDialog()}).catch(err => { updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
 }
 
 
 var preference = {
-  colorScheme: 'dark'
+  colorScheme: 'dark',
+  discordRPC: true,
+  startup: false
 };
 
 ipcMain.on('color-preference', (event, colorPreference) => {
   preference.colorScheme = colorPreference;
+  writePreferences()
+});
+
+ipcMain.on('toggleDiscordRichPresence', (event, discordPreference) => {
+  preference.discordRPC = discordPreference;
+  discordPreference == false ? rpc.destroy() : connectRPC();
+  writePreferences()
+});
+
+ipcMain.on('toggleRunOnStartup', (event, startupPreference) => {
+  if (process.platform == 'linux') return;
+  preference.startup = startupPreference;
+  startupPreference == false ? app.setLoginItemSettings({openAtLogin: false}) : app.setLoginItemSettings({openAtLogin: true});
   writePreferences()
 });
 
@@ -196,3 +210,7 @@ function writePreferences() {
     }
   }); 
 }
+
+ipcMain.on('update-check', (event) => {
+  checkUpdates();
+})

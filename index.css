@@ -1,5 +1,9 @@
 @import url("./fonts/fonts.css");
 
+html:has(div#updatestatus[status="appnotloaded"]){
+    pointer-events: none;
+}
+
 body {
     margin: 0;
 }
@@ -45,10 +49,7 @@ div#window>div#titleleft>div#windowlogo {
     letter-spacing: 1px;
     width: 30px;
     user-select: none;
-    -moz-user-select: none;
-    -khtml-user-select: none;
     -webkit-user-select: none;
-    -ms-user-select: none;
     padding-right: 10px;
 }
 
@@ -57,10 +58,7 @@ div#window>div#titleleft>div#windowtitle {
     font-size: 14px;
     font-weight: 700;
     user-select: none;
-    -moz-user-select: none;
-    -khtml-user-select: none;
     -webkit-user-select: none;
-    -ms-user-select: none;
     text-transform: uppercase;
 }
 
@@ -112,10 +110,7 @@ div#app>div#sidebar div.material-symbols-outlined {
 div#app>div#sidebar div.sidebarlabel {
     opacity: 1;
     user-select: none;
-    -moz-user-select: none;
-    -khtml-user-select: none;
     -webkit-user-select: none;
-    -ms-user-select: none;
 }
 
 div#app:has(div#sidebar) {
@@ -203,19 +198,30 @@ section#web {
     height: 100%;
 }
 
+section#settings {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
 div#content[current="web"]>section#web {
     display: block;
 }
 
-div#updatestatus[status="checking"]::after {
+div#content[current="settings"]>section#settings {
+    display: block;
+    height: 100%;
+    overflow-y: auto;
+}
+
+div#updatestatus[status="checking"]::after, section#settings div#updatestatusSETTINGS[status="checking"]::after {
     content: "sync";
 }
 
-div#updatestatus[status="downloading"]::after {
+div#updatestatus[status="downloading"]::after, section#settings div#updatestatusSETTINGS[status="downloading"]::after {
     content: "downloading";
 }
 
-div#updatestatus[status="downloaded"]::after {
+div#updatestatus[status="downloaded"]::after, section#settings div#updatestatusSETTINGS[status="downloaded"]::after {
     content: "download_done";
 }
 
@@ -229,7 +235,11 @@ div#updatestatus[status="appnotloaded"]::after {
     content: "pending";
 }
 
-div#updatestatus[status="fail"]::after {
+section#settings div#updatestatusSETTINGS[status="uptodate"]::after {
+    content: "check";
+}
+
+div#updatestatus[status="fail"]::after, section#settings div#updatestatusSETTINGS[status="fail"]::after {
     content: "sync_problem";
     animation: fail 1s steps(1) 0s infinite normal;
 }
@@ -287,6 +297,62 @@ html.dark {
             content: "LIGHT MODE";
         }
     }
+
+    div#app>div#content>section#settings>div#updateHERO {
+        background: #161616;
+        & div#updatestatusSETTINGS {
+            color: #F0F0F0;   
+        }
+        & div#updatestatusSETTINGSstring {
+            color: #F0F0F0;
+        }
+        & div#updateCheckSETTINGS {
+            color: #F0F0F0;
+        }
+    }
+
+    label[switchlabel] {
+        background: #E9E9E9;
+    }
+    
+    label[switchlabel]:after {
+        background: #f0f0f0;
+    }
+    
+    input[switch]:checked + label[switchlabel] {
+        background: #6495ed;
+    }
+
+    input[switch]:not(:checked) + label[switchlabel]:after {
+        background: #0f0f0f;
+    }
+
+    settingsoption {
+        color: #F0F0F0;
+    }
+    
+    settingsheading {
+        color: #E9E9E9;
+    }
+
+    hr {
+        border-color: #F0F0F0;
+    }
+
+    settingsoption:has(input[disabled]) {
+        color: lightgray !important;
+        & label[switchlabel] {
+            background: lightgray !important;
+        }
+        
+        & label[switchlabel]:after {
+            background: darkgray !important;
+        }
+    }
+
+    section#settings span, .settingsmaincontentbox:first-of-type:has(input[disabled])::after {
+        color: #F0F0F0;
+    }
 }
 
 @media screen and (max-width: 600px) {
@@ -335,10 +401,247 @@ html.light {
             content: "DARK MODE";
         }
     }
+
+    div#app>div#content>section#settings>div#updateHERO {
+        background: #E9E9E9;
+        & div#updatestatusSETTINGS {
+            color: #0F0F0F;   
+        }
+        & div#updateStatusSETTINGSstring {
+            color: #0F0F0F;
+        }
+        & div#updateCheckSETTINGS {
+            color: #0F0F0F;
+        }
+    }
+
+    label[switchlabel] {
+        background: #161616;
+    }
+    
+    label[switchlabel]:after {
+        background: #f0f0f0;
+    }
+    
+    input[switch]:checked + label[switchlabel] {
+        background: #404;
+    }
+
+    settingsoption {
+        color: #0F0F0F;
+    }
+    
+    settingsheading {
+        color: #161616;
+    }
+
+    hr {
+        border-color: #0F0F0F;
+    }
+
+    settingsoption:has(input[disabled]) {
+        color: darkgray;
+        & label[switchlabel] {
+            background: darkgray !important;
+        }
+        
+        & label[switchlabel]:after {
+            background: lightgray !important;
+        }
+    }
+
+    section#settings span, .settingsmaincontentbox:first-of-type:has(input[disabled])::after {
+        color: #0F0F0F;
+    }
 }
 
 @media screen and (max-width: 600px) {
     html.light div#app>div#sidebar div#collapse>div.material-symbols-outlined {
         color: #BDBDBD;
+    }
+}
+
+div#updateHERO {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 200px !important;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 15px;
+}
+
+div#updatestatusSETTINGS {
+    font-size: 96px;
+    margin-bottom: 15px;
+}
+
+div#updatestatusSETTINGSstring {
+    font-family: "Montserrat";
+    user-select: none;
+    -webkit-user-select: none;
+    font-size: 12px;
+}
+
+div#updateCheckSETTINGS {
+    font-size: 8px;
+    cursor: pointer;
+    font-family: "Montserrat";
+    margin-top: 5px;
+    font-style: italic;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+div#updateHERO:has(div#updatestatusSETTINGS[status="checking"]) div#updateCheckSETTINGS, div#updateHERO:has(div#updatestatusSETTINGS[status="downloading"]) div#updateCheckSETTINGS, div#updateHERO:has(div#updatestatusSETTINGS[status="downloaded"]) div#updateCheckSETTINGS {
+    display: none;
+}
+
+
+input[type=checkbox][switch]{
+	height: 0;
+	width: 0;
+	visibility: hidden;
+}
+
+label[switchlabel] {
+	cursor: pointer;
+	text-indent: -9999px;
+	width: 50px;
+	height: 25px;
+	background: #161616;
+	display: block;
+	border-radius: 100px;
+	position: relative;
+	transition: background 0.25s ease-in-out;
+}
+
+label[switchlabel]:after {
+	content: '';
+	position: absolute;
+	top: 5px;
+	left: 5px;
+	width: 15px;
+	height: 15px;
+	background: #fff;
+	border-radius: 27.5px;
+	transition: 0.25s;
+}
+
+input[switch]:checked + label[switchlabel] {
+	background: #6495ed;
+}
+
+input[switch]:checked + label[switchlabel]:after {
+	left: calc(100% - 5px);
+	transform: translateX(-100%);
+}
+
+label[switchlabel]:active:after, label:active~label[switchlabel]:after {
+	width: 25px;
+}
+
+settingsoption {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Montserrat';
+    margin-bottom: 15px;
+}
+
+settingsoption>label {
+    cursor: pointer;
+}
+
+settingsoption>label:first-child {
+    margin-right: 10px;
+}
+
+settingsheading {
+    font-family: 'Montserrat';
+    font-weight: 666;
+    font-style: italic;
+    font-size: 48px;
+    opacity: 75%;
+}
+
+section#settings hr {
+    width: 75%;
+    margin: 15px 0px;
+}
+
+div#settingsMainContent {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: fit-content;
+    justify-content: space-evenly;
+    height: fit-content;
+}
+
+div.settingsmaincontentbox {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+kaomoji {
+    white-space: nowrap;
+    line-height: 10px;
+}
+
+section#settings span {
+    text-align: center;
+    font-family: 'Montserrat';
+    font-size: 12px;
+}
+
+section#settings a {
+    color: unset;
+}
+
+.settingsmaincontentbox:first-of-type:has(input[disabled]), settingsoption:has(input[disabled])  {
+    font-style: italic;
+}
+
+.settingsmaincontentbox:first-of-type:has(input[disabled])::after {
+    content: "Certain options may be disabled on Linux, as they are not supported.";
+    font-family: "Montserrat";
+    font-size: 12px;
+}
+
+html.dark {
+    ::-webkit-scrollbar {
+        width: 10px;
+        background-color: #161616;
+    }
+      
+      ::-webkit-scrollbar-thumb {
+        background-color: #CFCFCF;
+    }
+      
+      ::-webkit-scrollbar-track {
+        background-color: #161616;
+        opacity: 0.5;
+    }
+}
+
+html.light {
+    ::-webkit-scrollbar {
+        width: 10px;
+        background-color: #E9E9E9;
+    }
+      
+      ::-webkit-scrollbar-thumb {
+        background-color: #161616;
+    }
+      
+      ::-webkit-scrollbar-track {
+        background-color: #E9E9E9;
+        opacity: 0.5;
     }
 }

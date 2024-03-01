@@ -23,6 +23,10 @@
                     </div>
                 </div>
                 <div id="sidebarbottom">
+                    <div id="settings" onclick="document.querySelector('#content').setAttribute('current', 'settings')">
+                        <div class="material-symbols-outlined">settings</div>
+                        <div class="sidebarlabel">OPTIONS & CREDITS</div>
+                    </div>
                     <div id="switchColorMode" onclick="updateColorPreference()">
                         <div class="material-symbols-outlined"></div>
                         <div class="sidebarlabel"></div>
@@ -35,6 +39,35 @@
             </div>
             <div id="content">
                 <section id="web"><iframe id="webiFrame" title="× deadcode ×" src="https://deadcode.is-a.dev"></iframe></section>
+                <section id="settings">
+                    <div id="updateHERO">
+                        <div id="updatestatusSETTINGS" class="material-symbols-outlined" status="checking"></div>
+                        <div id="updatestatusSETTINGSstring">Checking for updates...</div>
+                        <div id="updateCheckSETTINGS" onclick="checkForUpdates();">Check Updates</div>
+                    </div>
+                    <div id="settingsMainContent">
+                        <div class="settingsmaincontentbox">
+                            <settingsheading>Options</settingsheading>
+                            <hr>
+                            <settingsoption>
+                                <label for="DiscordRPCSwitch">Enable Discord Rich Presence</label>
+                                <input type="checkbox" id="DiscordRPCSwitch" switch="true">
+                                <label for="DiscordRPCSwitch" switchlabel></label>
+                            </settingsoption>
+                            <settingsoption>
+                                <label for="StartupSwitch">Run DeadForge on Startup</label>
+                                <input type="checkbox" id="StartupSwitch" switch="true">
+                                <label for="StartupSwitch" switchlabel></label>
+                                <br compatlayer>
+                            </settingsoption>
+                        </div>
+                        <div class="settingsmaincontentbox">
+                            <settingsheading>Credits</settingsheading>
+                            <hr>
+                            <span>This Launcher has been developed by kanshen.click (from Team DeadCode). Special thanks to Qlexc (<b><a href="https://github.com/MusicOnStereo" target="_blank">@MusicOnStereo</a></b>) for helping with async issues, you are amazing!<br><br><kaomoji>  ႔ ႔<br>ᠸ^ ^  <</kaomoji></span>
+                        </div>
+                    </div>
+                </section>
             </div>
         </div>
     </body>

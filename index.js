@@ -24,9 +24,27 @@ closeBtn.addEventListener('click', () => {
   window.close();
 });
 
-ipcRenderer.on('updateStatus', (event, status) => {
+ipcRenderer.on('updateStatus', (event, statusobject) => {
+  const { status, current, latest, failType } = statusobject;
+  console.log(status); console.log(current); console.log(latest); console.log(failType);
   const statusElement = document.querySelector('div#updatestatus');
+  const settingsStatusElement = document.querySelector('section#settings div#updatestatusSETTINGS');
+  const statusString = document.querySelector('div#updatestatusSETTINGSstring');
   statusElement.setAttribute('status', status);
+  settingsStatusElement.setAttribute('status', status);
+  if (status == 'checking') {
+    statusString.textContent = 'Checking for updates...';
+  } else if (status == 'uptodate') {
+    statusString.textContent = 'You are running the latest version: ' + current;
+  } else if (status == 'downloading') {
+    statusString.textContent = 'Downloading update... ' + current + ' -> ' + latest;
+  } else if (status == 'downloaded') {
+    statusString.textContent = 'Downloaded update: ' + latest;
+  } else if (status == 'fail' && failType == 'check') {
+    statusString.textContent = 'Failed to check for updates. Are you connected to the internet?';
+  } else if (status == 'fail' && failType == 'download') {
+    statusString.textContent = 'Failed to download update. Are you connected to the internet?';
+  }
 });
 
 function updateColorPreference() {
@@ -44,8 +62,27 @@ function sendColorPreference() {
   ipcRenderer.send('color-preference', document.querySelector('html').classList.contains('dark') ? 'dark' : 'light');
 }
 
+const discordRichPresenceSwitch = document.querySelector('input#DiscordRPCSwitch');
+const startupSwitch = document.querySelector('input#StartupSwitch');
+
 ipcRenderer.on('preferences', (event, preferencesData) => {
   const preferences = JSON.parse(preferencesData);
   document.querySelector('html').classList.remove('light', 'dark');
   document.querySelector('html').classList.add(preferences.colorScheme);
+  discordRichPresenceSwitch.checked = preferences.discordRPC;
+  if (process.platform !== 'linux') { startupSwitch.checked = preferences.startup } else { startupSwitch.disabled = true };
+});
+
+function checkForUpdates() {
+  ipcRenderer.send('update-check');
+}
+
+discordRichPresenceSwitch.addEventListener('change', (event) => {
+  const isChecked = event.target.checked;
+  ipcRenderer.send('toggleDiscordRichPresence', isChecked);
+});
+
+startupSwitch.addEventListener('change', (event) => {
+  const isChecked = event.target.checked;
+  ipcRenderer.send('toggleRunOnStartup', isChecked);
 });
