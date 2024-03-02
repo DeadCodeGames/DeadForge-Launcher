@@ -149,7 +149,7 @@ async function checkUpdates() {
       cancelId: 1
     };
   
-    dialog.showMessageBox(null, options).then((result) => { if (result.response == 0) { app.quit(); shell.openExternal(installerPath); } else { app.on('before-quit', () => { app.quit(); shell.openExternal(installerPath);});}});
+    dialog.showMessageBox(null, options).then((result) => { if (result.response == 0) { app.quit(); shell.openExternal(installerPath); }});
   }
 
   async function downloadUpdate() {
@@ -174,7 +174,7 @@ async function checkUpdates() {
     });
   }
 
-  await downloadUpdate().then(() => {updateStatus({'status': 'downloaded', 'current': version, 'latest': latestversion}); showInstallDialog()}).catch(err => { updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
+  await downloadUpdate().then(() => { updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); { app.on('before-quit', () => { shell.openExternal(installerPath); }); };  showInstallDialog()}).catch(err => { updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
 }
 
 
