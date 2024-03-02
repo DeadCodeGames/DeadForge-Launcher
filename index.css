@@ -7,15 +7,18 @@ hero {
     height: 100%;
     width: 100%;
     perspective: 1000px;
+    overflow: hidden;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 a#logo {
     position: absolute;
-    top: 250px;
+    top: max(30vh, 13vw);
     color: white;
     font-family: "Montserrat";
     font-weight: bold;
-    font-size: 64px;
+    font-size: max(5vh, 3.33vw);
     text-align: center;
     text-decoration: none;
 }
@@ -24,14 +27,14 @@ heading {
     color: white;
     font-family: "Uni Sans CAPS";
     font-weight: bold;
-    font-size: 128px;
+    font-size: min(10vh, 6.66vw);
 }
 
 subheading {
     color: white;
     font-family: "Uni Sans CAPS";
     font-weight: normal;
-    font-size: 32px;
+    font-size: min(2.5vh, 2.5vw);
 }
 
 body {
@@ -39,12 +42,12 @@ body {
 }
 
 downloadbutton {
-    border-radius: 16px;
-    height: 75px;
-    width: 333px;
+    border-radius: min(1.48vh, 0.83vw);
+    height: min(6.9vh, 3.9vw);
+    width: min(30vh, 17vw);
     background: white;
     color: black;
-    font-size: 24px;
+    font-size: min(2.2vh, 1.25vw);
     font-family: 'Uni Sans CAPS';
     font-weight: bold;
     display: flex;
@@ -58,24 +61,24 @@ downloadbutton {
 downloadbutton[disabled] {
     background: #666;
     color: #333;
-    width: 275px;
+    width: min(25.4vh, 14.3vw);
 }
 
 a#downloadbutton {
     all: unset;
     text-decoration: none;
     cursor: pointer;
-    top: 20px;
+    top: min(1.5vh, 10.4vw);
     position: relative;
 }
 
 downloadbuttonsmall {
     transition: background-image 0.5s ease-in-out;
-    width: 75px;
-    height: 75px;
+    width: min(6.9vh, 3.9vw);
+    height: min(6.9vh, 3.9vw);
     display: block;
     background-size: contain;
-    border-radius: 16px;
+    border-radius: min(1.48vh, 0.8vw);
 }
 
 downloadbuttonsarray {
@@ -83,41 +86,48 @@ downloadbuttonsarray {
     flex-direction: row;
     justify-content: space-between;
     position: relative;
-    top: 40px;
-    width: 333px;
+    top: min(3.7vh, 20.8vw);
+    width: min(30.8vh, 17.3vw);
     transition: width 0.5s ease-in-out;
-    & a#downloadwin>downloadbuttonsmall {
+    &
+    a#downloadwin>downloadbuttonsmall {
         background-image: url("img/windows.png");
     }
-    & a#downloadlinux>downloadbuttonsmall {
+    &
+    a#downloadlinux>downloadbuttonsmall {
         background-image: url("img/linux.png");
     }
-    & a#downloadmac>downloadbuttonsmall {
+    &
+    a#downloadmac>downloadbuttonsmall {
         background-image: url("img/macos.png");
     }
-    & a#downloadwin>downloadbuttonsmall[disabled] {
+    &
+    a#downloadwin>downloadbuttonsmall[disabled] {
         background-image: url("img/windowsdisabled.png");
     }
-    & a#downloadlinux>downloadbuttonsmall[disabled] {
+    &
+    a#downloadlinux>downloadbuttonsmall[disabled] {
         background-image: url("img/linuxdisabled.png");
     }
-    & a#downloadmac>downloadbuttonsmall[disabled] {
+    &
+    a#downloadmac>downloadbuttonsmall[disabled] {
         background-image: url("img/macosdisabled.png");
     }
 }
 
 downloadbuttonsarray[disabled] {
-    width: 275px;
+    width: min(25.4vh, 14.3vw);
 }
 
 canvas {
     top: 0;
     left: 0;
     position: absolute;
-    width: 100%;
-    height: 100%;
     display: block;
     z-index: -1;
+    min-width: 100%;
+    min-height: 100%;
+    aspect-ratio: 16/9;
 }
 
 @media (prefers-color-scheme: light) {
