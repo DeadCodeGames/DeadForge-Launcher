@@ -1,5 +1,6 @@
 {
   "colorScheme": "dark",
   "discordRPC": true,
-  "startup": false
+  "startup": false,
+  "betaEnabled": false
 }
