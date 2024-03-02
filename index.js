@@ -37,9 +37,9 @@ ipcRenderer.on('updateStatus', (event, statusobject) => {
   } else if (status == 'uptodate') {
     statusString.textContent = 'You are running the latest version: ' + current;
   } else if (status == 'downloading') {
-    statusString.textContent = 'Downloading update... ' + current + ' -> ' + latest;
+    statusString.textContent = 'Downloading latest update... ' + current + ' -> ' + latest;
   } else if (status == 'downloaded') {
-    statusString.textContent = 'Downloaded update: ' + latest;
+    statusString.textContent = 'Downloaded latest update: ' + latest;
   } else if (status == 'fail' && failType == 'check') {
     statusString.textContent = 'Failed to check for updates. Are you connected to the internet?';
   } else if (status == 'fail' && failType == 'download') {

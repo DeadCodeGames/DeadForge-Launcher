@@ -111,14 +111,14 @@ function connectRPC() {
 
 async function checkUpdates() {
   updateStatus({"status": "checking", "current": version});
-  var JS = await fetch("https://api.github.com/repos/DeadCodeGames/DeadForge/releases").then(response => response.json()).catch(err => { updateStatus({ "status": "fail", "current": version, "latest": undefined, "failType": "check" }); console.error(err) }), assets, downloadLinksByOS = {}, platform, latestversion, installerPath;
+  var JS = await fetch("https://api.github.com/repos/DeadCodeGames/DeadForge/releases").then(response => response.json()).catch(err => { updateStatus({ "status": "fail", "current": version, "latest": undefined, "failType": "check" }); console.error(err) }), assets, downloadLinksByOS = {}, platform, latestversion, installerPath, currentlydownloadedupdate;
   const downloadsFolder = require('downloads-folder');
-
 
   assets = JS[0].assets;
   latestversion = JS[0].tag_name;
 
-  if (latestversion == version) {updateStatus({"status": "uptodate", "current": version}); return};
+  if (latestversion == version) { updateStatus({ "status": "uptodate", "current": version }); return }
+  else if (latestversion == currentlydownloadedupdate) { updateStatus({ "status": "downloaded", "current": version, "latest": latestversion }); return };
 
   assets.forEach(asset => {
     const fileName = asset.name.toLowerCase();
