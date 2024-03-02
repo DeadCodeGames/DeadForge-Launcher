@@ -371,6 +371,10 @@ html.dark {
     section#settings span, .settingsmaincontentbox:first-of-type:has(input[disabled])::after {
         color: #F0F0F0;
     }
+
+    section#settings div.settingsmaincontentbox {
+        color: #F0F0F0;
+    }
 }
 
 @media screen and (max-width: 750px) {
@@ -473,6 +477,10 @@ html.light {
     }
 
     section#settings span, .settingsmaincontentbox:first-of-type:has(input[disabled])::after {
+        color: #0F0F0F;
+    }
+
+    section#settings div.settingsmaincontentbox {
         color: #0F0F0F;
     }
 }
@@ -782,4 +790,65 @@ div#controls>div#close:hover {
 
 div#controls>* {
     transition: background 0.125s ease-in-out
+}
+
+section#settings div.settingsmaincontentbox {
+    creditsline {
+        height: 75px;
+        display: flex;
+        flex-direction: row;
+    }
+    
+    creditbanner {
+        width: fit-content;
+        display: flex;
+        flex-direction: row;
+        height: 50px;
+        align-items: center;
+        padding: 12.5px;
+        background: #80808080;
+        border-radius: 25px;
+    }
+    
+    creditpfp, creditpfp>img {
+        height: 50px;
+        border-radius: 25px;
+    }
+    
+    creditinfo {
+        display: flex;
+        flex-direction: column;
+        font-family: 'Uni Sans CAPS';
+    }
+    
+    creditpfp {
+        margin-right: 12.5px;
+    }
+    
+    credittype {
+        font-style: italic;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    creditname>logo {
+        font-family: 'Montserrat';
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 1px;
+        width: 30px;
+        user-select: none;
+        -webkit-user-select: none;
+        margin-left: 5px;
+    }
+    
+    creditname {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+    }
+    
+    creditbanner:not(:last-of-type) {
+        margin-right: 15px;
+    }
 }
