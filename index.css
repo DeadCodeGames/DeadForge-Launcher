@@ -634,11 +634,11 @@ section#settings a {
     color: unset;
 }
 
-.settingsmaincontentbox:first-of-type:has(input[disabled]), settingsoption:has(input[disabled])  {
+settingsoption:has(input[disabled])  {
     font-style: italic;
 }
 
-.settingsmaincontentbox:first-of-type:has(input[disabled])::after {
+.settingsmaincontentbox:first-of-type:has(input[disabled]:not([temp]))::after {
     content: "Certain options may be disabled on Linux, as they are not supported.";
     font-family: "Montserrat";
     font-size: 12px;
@@ -673,6 +673,10 @@ html.light {
       ::-webkit-scrollbar-track {
         background-color: #E9E9E9;
         opacity: 0.5;
+    }
+
+    gamesection>info {
+        filter: invert(1);
     }
 }
 

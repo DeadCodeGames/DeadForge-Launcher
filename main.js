@@ -6,7 +6,7 @@ const axios = require('axios');
 const fs = require('fs');
 const downloadsFolder = require('downloads-folder');
 
-let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }
+let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -58,6 +58,7 @@ app.whenReady().then(() => {
       }
 
       mainWindow.webContents.send('preferences', data);
+      preferences = JSON.parse(data);
       JSON.parse(data).discordRPC ? connectRPC() : null;
   });
     checkUpdates()
@@ -121,22 +122,28 @@ function connectRPC() {
   });
 }
 
+function disableUpdateButton(status) {
+  mainWindow.webContents.send('disableUpdateButton', status);
+}
+
 async function checkUpdates() {
+  disableUpdateButton(true);
   updateStatus({"status": "checking", "current": version});
   var JS = await fetch("https://api.github.com/repos/DeadCodeGames/DeadForge/releases").then(response => response.json()).catch(err => { updateStatus({ "status": "fail", "current": version, "latest": undefined, "failType": "check" }); console.error(err) }), assets, downloadLinksByOS = {}, platform, latestversion, installerPath, currentlydownloadedupdate, updateIndex = 0, pendingBetaUpdates = 0;
-  var betaEnabled = JSON.parse(fs.readFileSync(path.join(path.join(path.dirname(__dirname), 'app.asar.unpacked'), 'preferences.json'), 'utf8')).betaEnabled;
+  var betaEnabled = JSON.parse(fs.readFileSync(path.join(__dirname, 'preferences.json'), 'utf8')).betaEnabled;
+  if (!Array.isArray(JS)) { updateStatus({ "status": "fail", "current": version, "latest": undefined, "failType": "check" }); disableUpdateButton(false); return }
 
   for (updateIndex; updateIndex < JS.length; updateIndex++) {
     if (JS[updateIndex].tag_name == version) { break }
     if ((JS[updateIndex].prerelease == true && !betaEnabled)) { pendingBetaUpdates++; continue } else { break }
   }
 
-  if (updateIndex == JS.length) { updateStatus({ "status": "uptodate", "current": version, "latest": latestversion, failType: null, betaEnabled: betaEnabled, pendingBetaUpdates: pendingBetaUpdates }); return }
+  if (updateIndex == JS.length) { updateStatus({ "status": "uptodate", "current": version, "latest": latestversion, failType: null, betaEnabled: betaEnabled, pendingBetaUpdates: pendingBetaUpdates }); disableUpdateButton(false); return }
   
   assets = JS[updateIndex].assets;
   latestversion = JS[updateIndex].tag_name;
 
-  if (latestversion == version) { updateStatus({ "status": "uptodate", "current": version, "latest": latestversion, failType: null, betaEnabled: betaEnabled, pendingBetaUpdates: pendingBetaUpdates }); return }
+  if (latestversion == version) { updateStatus({ "status": "uptodate", "current": version, "latest": latestversion, failType: null, betaEnabled: betaEnabled, pendingBetaUpdates: pendingBetaUpdates }); disableUpdateButton(false); return }
   else if (latestversion == currentlydownloadedupdate) { updateStatus({ "status": "downloaded", "current": version, "latest": latestversion }); return };
 
   assets.forEach(asset => {
@@ -175,7 +182,7 @@ async function checkUpdates() {
     var writer;
     if (platform == "windows") { installerPath = path.join(downloadsFolder(), 'update.exe'); writer = fs.createWriteStream(installerPath); }
     else if (platform == "mac") { installerPath = path.join(downloadsFolder(), 'update.dmg'); writer = fs.createWriteStream(installerPath); }
-    else if (platform == "linux") { installerPath = path.join(downloadsFolder(), 'update.deb'); writer = fs.createWriteStream(installerPath);}
+    else if (platform == "linux") { installerPath = path.join(downloadsFolder(), 'update.deb'); writer = fs.createWriteStream(installerPath); }
 
     updateStatus({"status": "downloading", "current": version, "latest": latestversion});
   
@@ -193,54 +200,46 @@ async function checkUpdates() {
     });
   }
 
-  await downloadUpdate().then(() => { updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); { app.on('before-quit', () => { fs.renameSync(path.join(path.join(path.dirname(__dirname), 'app.asar.unpacked'), 'preferences.json'), path.join(downloadsFolder(), 'deadforge.preferences.json')); shell.openExternal(installerPath); }); };  showInstallDialog()}).catch(err => { updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
+  await downloadUpdate().then(() => { disableUpdateButton(false); updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); { app.on('before-quit', () => { fs.renameSync(path.join(path.join(path.dirname(__dirname), 'app.asar.unpacked'), 'preferences.json'), path.join(downloadsFolder(), 'deadforge.preferences.json')); shell.openExternal(installerPath); }); };  showInstallDialog()}).catch(err => { disableUpdateButton(false); updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
 }
 
+  ipcMain.on('color-preference', (event, colorPreference) => {
+    preferences.colorScheme = colorPreference;
+    writePreferences()
+  });
 
-var preference = {
-  colorScheme: 'dark',
-  discordRPC: true,
-  startup: false,
-  betaEnabled: false
-};
+  ipcMain.on('toggleDiscordRichPresence', (event, discordPreference) => {
+    preferences.discordRPC = discordPreference;
+    discordPreference == false ? rpc.destroy() : connectRPC();
+    writePreferences()
+  });
 
-ipcMain.on('color-preference', (event, colorPreference) => {
-  preference.colorScheme = colorPreference;
-  writePreferences()
-});
+  ipcMain.on('toggleRunOnStartup', (event, startupPreference) => {
+    if (process.platform == 'linux') return;
+    preferences.startup = startupPreference;
+    startupPreference == false ? app.setLoginItemSettings({ openAtLogin: false }) : app.setLoginItemSettings({ openAtLogin: true });
+    writePreferences()
+  });
 
-ipcMain.on('toggleDiscordRichPresence', (event, discordPreference) => {
-  preference.discordRPC = discordPreference;
-  discordPreference == false ? rpc.destroy() : connectRPC();
-  writePreferences()
-});
-
-ipcMain.on('toggleRunOnStartup', (event, startupPreference) => {
-  if (process.platform == 'linux') return;
-  preference.startup = startupPreference;
-  startupPreference == false ? app.setLoginItemSettings({openAtLogin: false}) : app.setLoginItemSettings({openAtLogin: true});
-  writePreferences()
-});
-
-ipcMain.on('toggleBeta', (event, betaPreference) => {
-  preference.betaEnabled = betaPreference;
-  if (betaPreference == true) {
-    checkUpdates();
-  }
-  writePreferences()
-})
-
-function writePreferences() {
-  const jsonData = JSON.stringify(preference, null, 2);
-
-  fs.writeFile(path.join(__dirname, 'preferences.json'), jsonData, 'utf8', (err) => {
-    if (err) {
-      console.error('preferences', err);
-      return;
+  ipcMain.on('toggleBeta', (event, betaPreference) => {
+    preferences.betaEnabled = betaPreference;
+    if (betaPreference == true) {
+      checkUpdates();
     }
-  }); 
-}
+    writePreferences()
+  })
 
-ipcMain.on('update-check', (event) => {
-  checkUpdates();
-})
+  function writePreferences() {
+    const jsonData = JSON.stringify(preferences, null, 2);
+
+    fs.writeFile(path.join(__dirname, 'preferences.json'), jsonData, 'utf8', (err) => {
+      if (err) {
+        console.error('preferences', err);
+        return;
+      }
+    });
+  }
+
+  ipcMain.on('update-check', (event) => {
+    checkUpdates();
+  })

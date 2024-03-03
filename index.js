@@ -37,9 +37,7 @@ ipcRenderer.on('updateStatus', (event, statusobject) => {
     statusString.textContent = 'You are running the latest version: ' + current;
   } else if (status == 'uptodate' && !betaEnabled) {
     statusString.textContent = 'There are no newer stable updates. You are running version ' + current + '. There ' + (pendingBetaUpdates == 1 ? 'is' : 'are') + ' ' + (pendingBetaUpdates == 0 ? 'no' : pendingBetaUpdates) + ' beta update' + (pendingBetaUpdates == 1 ? '' : 's') + ' available.';
-  }
-  
-  else if (status == 'downloading') {
+  } else if (status == 'downloading') {
     statusString.textContent = 'Downloading latest update... ' + current + ' -> ' + latest;
   } else if (status == 'downloaded') {
     statusString.textContent = 'Downloaded latest update: ' + latest;
@@ -96,3 +94,8 @@ betaSwitch.addEventListener('change', (event) => {
   const isChecked = event.target.checked;
   ipcRenderer.send('toggleBeta', isChecked);
 });
+
+ipcRenderer.on('disableUpdateButton', (event, status) => {
+  betaSwitch.disabled = status;
+  status == true ? betaSwitch.setAttribute('temp', status) : betaSwitch.removeAttribute('temp');
+})
