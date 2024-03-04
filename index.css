@@ -494,11 +494,12 @@ html.light {
 div#updateHERO {
     display: flex;
     flex-direction: column;
-    width: 100%;
+    width: calc(100% - 20px);
     height: 200px !important;
     align-items: center;
     justify-content: center;
     margin-bottom: 15px;
+    padding: 0 10px;
 }
 
 div#updatestatusSETTINGS {
@@ -511,6 +512,7 @@ div#updatestatusSETTINGSstring {
     user-select: none;
     -webkit-user-select: none;
     font-size: 12px;
+    text-align: center;
 }
 
 div#updateCheckSETTINGS {

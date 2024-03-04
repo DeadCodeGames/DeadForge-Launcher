@@ -20,8 +20,7 @@ maximizeBtn.addEventListener('click', () => {
 });
 
 closeBtn.addEventListener('click', () => {
-  const window = BrowserWindow.getFocusedWindow();
-  window.close();
+  ipcRenderer.send('close');
 });
 
 ipcRenderer.on('updateStatus', (event, statusobject) => {
@@ -66,6 +65,7 @@ function sendColorPreference() {
 const discordRichPresenceSwitch = document.querySelector('input#DiscordRPCSwitch');
 const startupSwitch = document.querySelector('input#StartupSwitch');
 const betaSwitch = document.querySelector('input#BetaSwitch');
+const traySwitch = document.querySelector('input#TraySwitch');
 
 ipcRenderer.on('preferences', (event, preferencesData) => {
   const preferences = JSON.parse(preferencesData);
@@ -74,6 +74,7 @@ ipcRenderer.on('preferences', (event, preferencesData) => {
   discordRichPresenceSwitch.checked = preferences.discordRPC;
   if (process.platform !== 'linux') { startupSwitch.checked = preferences.startup } else { startupSwitch.disabled = true };
   betaSwitch.checked = preferences.betaEnabled;
+  traySwitch.checked = preferences.closeToTray;
 });
 
 function checkForUpdates() {
@@ -98,4 +99,9 @@ betaSwitch.addEventListener('change', (event) => {
 ipcRenderer.on('disableUpdateButton', (event, status) => {
   betaSwitch.disabled = status;
   status == true ? betaSwitch.setAttribute('temp', status) : betaSwitch.removeAttribute('temp');
+})
+
+traySwitch.addEventListener('change', (event) => {
+  const isChecked = event.target.checked;
+  ipcRenderer.send('toggleTray', isChecked);
 })

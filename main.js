@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, dialog, ipcMain } = require('electron');
+const { app, BrowserWindow, shell, dialog, ipcMain, Menu, Tray } = require('electron');
 require('@electron/remote/main').initialize()
 const DiscordRPC = require('discord-rpc');
 const path = require('node:path');
@@ -6,7 +6,7 @@ const axios = require('axios');
 const fs = require('fs');
 const downloadsFolder = require('downloads-folder');
 
-let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences;
+let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences, tray, contextMenuHidden, contextMenuVisible;
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -24,6 +24,16 @@ const createWindow = () => {
       devTools: false
     }
   });
+
+  contextMenuHidden = Menu.buildFromTemplate([
+    { label: 'Show', click: () => { mainWindow.show(); tray.setContextMenu(contextMenuVisible); } },
+    { label: 'Quit', click: () => app.quit() }
+  ]);
+
+  contextMenuVisible = Menu.buildFromTemplate([
+    { label: 'Hide', click: () => { mainWindow.hide(); tray.setContextMenu(contextMenuHidden); } },
+    { label: 'Quit', click: () => app.quit() }
+  ]);
 
 
   require("@electron/remote/main").enable(mainWindow.webContents);
@@ -60,7 +70,21 @@ app.whenReady().then(() => {
 
       mainWindow.webContents.send('preferences', data);
       preferences = JSON.parse(data);
-      JSON.parse(data).discordRPC ? connectRPC() : null;
+      preferences.discordRPC ? connectRPC() : null;
+      if (preferences.closeToTray == true) {
+        tray = new Tray(process.platform == 'darwin' ? path.join(__dirname, 'res', 'DEADFORGE.icon.Template.png') : path.join(__dirname, 'res', 'DEADFORGE.icon.png'));
+        tray.setContextMenu(contextMenuVisible);
+      };
+
+      ipcMain.on('close', (event) => {
+        if (!app.isQuiting && preferences.closeToTray == true) {
+          event.preventDefault();
+          mainWindow.hide(); 
+          tray.setContextMenu(contextMenuHidden);
+        } else {
+          app.quit();
+        }
+      });
   });
     checkUpdates()
     setInterval(checkUpdates, 10 * 60 * 1000);
@@ -243,4 +267,10 @@ async function checkUpdates() {
 
   ipcMain.on('update-check', (event) => {
     checkUpdates();
+  })
+
+  ipcMain.on('toggleTray', (event, trayPreference) => {
+    preferences.closeToTray = trayPreference;
+    if (trayPreference == false) { tray.destroy() } else { tray = tray = new Tray(process.platform == 'darwin' ? path.join(__dirname, 'res', 'DEADFORGE.icon.Template.png') : path.join(__dirname, 'res', 'DEADFORGE.icon.png')); tray.setContextMenu(contextMenuVisible) };
+    writePreferences()
   })
