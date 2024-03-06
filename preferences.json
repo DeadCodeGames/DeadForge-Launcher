@@ -2,6 +2,6 @@
   "colorScheme": "dark",
   "discordRPC": true,
   "startup": false,
-  "betaEnabled": false,
+  "betaEnabled": true,
   "closeToTray": true
 }

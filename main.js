@@ -6,7 +6,15 @@ const axios = require('axios');
 const fs = require('fs');
 const downloadsFolder = require('downloads-folder');
 
-let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences, tray, contextMenuHidden, contextMenuVisible;
+let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [];
+function askToQuit() {
+  let questionString = 'There '; questionString += Object.keys(currentDownloads).length == 1 ? 'is ' : 'are currently '; questionString += Object.keys(currentDownloads).length; questionString += Object.keys(currentDownloads).length == 1 ? ' item being downloaded:\n' : ' downloads being downloaded:\n'; questionString += currentDownloads.map(item => { const key = Object.keys(item)[0]; const value = item[key]; return `${value.string} ${value.version}`; }).join('\n'); questionString += '\n\nAre you sure you want to quit?'
+  dialog.showMessageBox({
+    type: 'question',
+    message: questionString,
+    buttons: ['Yes', 'No']
+  }).then((response) => { if (response.response == 0) { forceQuitAllowed = true; app.exit(); } })
+};
 
 const createWindow = () => {
   mainWindow = new BrowserWindow({
@@ -75,6 +83,11 @@ app.whenReady().then(() => {
         tray = new Tray(process.platform == 'darwin' ? path.join(__dirname, 'res', 'DEADFORGE.icon.Template.png') : path.join(__dirname, 'res', 'DEADFORGE.icon.png'));
         tray.setContextMenu(contextMenuVisible);
       };
+      let forceQuitAllowed = false;
+      app.on('before-quit', (event) => {
+        if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { app.exit(); }
+        else { event.preventDefault(); askToQuit(); }
+      })
 
       ipcMain.on('close', (event) => {
         if (!app.isQuiting && preferences.closeToTray == true) {
@@ -82,7 +95,19 @@ app.whenReady().then(() => {
           mainWindow.hide(); 
           tray.setContextMenu(contextMenuHidden);
         } else {
-          app.quit();
+          if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { mainWindow.destroy(); }
+          else { event.preventDefault(); askToQuit(); }
+        }
+      });
+
+      mainWindow.on('close', (event) => {
+        if (!app.isQuiting && preferences.closeToTray == true) {
+          event.preventDefault();
+          mainWindow.hide(); 
+          tray.setContextMenu(contextMenuHidden);
+        } else {
+          if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { mainWindow.destroy(); }
+          else { event.preventDefault(); askToQuit(); }
         }
       });
   });
@@ -209,12 +234,25 @@ async function checkUpdates() {
     else if (platform == "mac") { installerPath = path.join(downloadsFolder(), 'update.dmg'); writer = fs.createWriteStream(installerPath); }
     else if (platform == "linux") { installerPath = path.join(downloadsFolder(), 'update.deb'); writer = fs.createWriteStream(installerPath); }
 
-    updateStatus({"status": "downloading", "current": version, "latest": latestversion});
+    app.on('before-quit', () => {
+      
+    })
+
+    updateStatus({ "status": "downloading", "current": version, "latest": latestversion });
+    currentDownloads.push({ "launcherUpdate": { "string": "DeadForge", "version": latestversion } });
+    var downloadProgress = 0;
   
     const response = await axios({
       url: downloadLinksByOS[platform],
       method: 'GET',
       responseType: 'stream',
+      onDownloadProgress: (progressEvent) => {
+        const totalLength = progressEvent.total;
+        if (totalLength !== null) {
+          downloadProgress = progressEvent.loaded / totalLength;
+          try { mainWindow.webContents.send('launcherUpdateDownloadProgress', downloadProgress) } catch (err) { };
+        }
+      }
     });
   
     response.data.pipe(writer);
@@ -225,7 +263,7 @@ async function checkUpdates() {
     });
   }
 
-  await downloadUpdate().then(() => { disableUpdateButton(false); updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); { app.on('before-quit', () => { fs.renameSync(path.join(path.join(path.dirname(__dirname), 'app.asar.unpacked'), 'preferences.json'), path.join(downloadsFolder(), 'deadforge.preferences.json')); shell.openExternal(installerPath); }); };  showInstallDialog()}).catch(err => { disableUpdateButton(false); updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
+  await downloadUpdate().then(() => { currentDownloads.splice(currentDownloads.findIndex(item => Object.keys(item)[0] === 'launcherUpdate'), 1); disableUpdateButton(false); updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); { app.on('before-quit', () => { fs.renameSync(path.join(path.join(path.dirname(__dirname), 'app.asar.unpacked'), 'preferences.json'), path.join(downloadsFolder(), 'deadforge.preferences.json')); shell.openExternal(installerPath); }); }; showInstallDialog(); downloadProgress = 0; mainWindow.webContents.send('launcherUpdateDownloadProgress', downloadProgress)}).catch(err => { disableUpdateButton(false); updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
 }
 
   ipcMain.on('color-preference', (event, colorPreference) => {

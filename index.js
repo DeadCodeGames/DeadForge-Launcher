@@ -105,3 +105,7 @@ traySwitch.addEventListener('change', (event) => {
   const isChecked = event.target.checked;
   ipcRenderer.send('toggleTray', isChecked);
 })
+
+ipcRenderer.on('launcherUpdateDownloadProgress', (event, progress) => {
+  document.querySelector('progress#launcherUpdateProgress').setAttribute('value', progress);
+})
