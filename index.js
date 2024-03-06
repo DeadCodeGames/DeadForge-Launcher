@@ -41,13 +41,10 @@ xmlhttp.onreadystatechange = function() {
       }
     });
 
-    winbutton.setAttribute("href", downloadLinksByOS['windows']);
-    linuxbutton.setAttribute("href", downloadLinksByOS['linux']);
-    macbutton.setAttribute("href", downloadLinksByOS['mac']);
+    if (downloadLinksByOS['windows']) {winbutton.setAttribute("href", downloadLinksByOS['windows']); winbutton.querySelector("downloadbuttonsmall").removeAttribute("disabled");}
+    if (downloadLinksByOS['linux']) {linuxbutton.setAttribute("href", downloadLinksByOS['linux']); linuxbutton.querySelector("downloadbuttonsmall").removeAttribute("disabled");}
+    if (downloadLinksByOS['mac']) {macbutton.setAttribute("href", downloadLinksByOS['mac']); macbutton.querySelector("downloadbuttonsmall").removeAttribute("disabled");}
     smallbuttonsarray.removeAttribute("disabled");
-    winbutton.querySelector("downloadbuttonsmall").removeAttribute("disabled");
-    linuxbutton.querySelector("downloadbuttonsmall").removeAttribute("disabled");
-    macbutton.querySelector("downloadbuttonsmall").removeAttribute("disabled");
   }
 };
 xmlhttp.open("GET", "https://api.github.com/repos/DeadCodeGames/DeadForge-Launcher/releases", true);
