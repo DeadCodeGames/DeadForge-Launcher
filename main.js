@@ -7,14 +7,17 @@ const fs = require('fs');
 const downloadsFolder = require('downloads-folder');
 const isOnline = require('on-line');
 
-let mainWindow, updateModal, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate;
+let mainWindow, updateModal, quitConfirm, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate;
 function askToQuit() {
-  let questionString = 'There '; questionString += Object.keys(currentDownloads).length == 1 ? 'is ' : 'are currently '; questionString += Object.keys(currentDownloads).length; questionString += Object.keys(currentDownloads).length == 1 ? ' item being downloaded:\n' : ' downloads being downloaded:\n'; questionString += currentDownloads.map(item => { const key = Object.keys(item)[0]; const value = item[key]; return `${value.string} ${value.version}`; }).join('\n'); questionString += '\n\nAre you sure you want to quit?'
+  /*let questionString = 'There '; questionString += Object.keys(currentDownloads).length == 1 ? 'is ' : 'are currently '; questionString += Object.keys(currentDownloads).length; questionString += Object.keys(currentDownloads).length == 1 ? ' item being downloaded:\n' : ' downloads being downloaded:\n'; questionString += currentDownloads.map(item => { const key = Object.keys(item)[0]; const value = item[key]; return `${value.string} ${value.version}`; }).join('\n'); questionString += '\n\nAre you sure you want to quit?'
   dialog.showMessageBox({
     type: 'question',
     message: questionString,
     buttons: ['Yes', 'No']
-  }).then((response) => { if (response.response == 0) { forceQuitAllowed = true; app.exit(); } })
+  }).then((response) => { if (response.response == 0) { forceQuitAllowed = true; app.exit(); } })*/
+  createQuitQuestion();
+  quitConfirm.on('ready-to-show', () => { quitConfirm.webContents.send('askToQuit', currentDownloads); quitConfirm.show(); });
+  ipcMain.on('quitConfirmation', (event, arg) => { if (arg == true) { forceQuitAllowed = true; app.exit(); } else { quitConfirm.destroy(); } });
 };
 
 const singleInstanceLock = app.requestSingleInstanceLock();
@@ -89,6 +92,39 @@ const createUpdateModal = () => {
   updateModal.loadFile('update.html');
 
   updateModal.on('close', (e) => { e.preventDefault(); });
+}
+
+const createQuitQuestion = () => {
+  if (quitConfirm != undefined) { quitConfirm.destroy() }
+  quitConfirm = new BrowserWindow({
+    width: 450,
+    height: 400,
+    resizable: false,
+    closable: false,
+    maximizable: false,
+    minimizable: false,
+    frame: false,
+    contextisolation: false,
+    nodeIntegration: true,
+    titleBarStyle: 'hidden',
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      devTools: false
+    },
+    parent: mainWindow,
+    modal: true,
+    show: false
+  });
+
+  require("@electron/remote/main").enable(quitConfirm.webContents);
+
+  quitConfirm.setBackgroundMaterial("acrylic");
+  quitConfirm.setBackgroundColor("#161616");
+
+  quitConfirm.loadFile('askToQuit.html');
+
+  quitConfirm.on('close', (e) => { e.preventDefault(); });
 }
 
 if (!singleInstanceLock) {
