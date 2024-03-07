@@ -1,0 +1,38 @@
+@import url("./fonts/fonts.css");
+
+html {
+    display: none;
+}
+
+html.dark, html.light {
+    display: block;
+}
+
+html.dark {
+    background: #2A2A2A;
+    color: #F0F0F0;
+}
+
+html.light {
+    background: #D5D5D5;
+    color: #0F0F0F;
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Montserrat';
+    flex-direction: column;
+    height: 100%;
+    margin: 0;
+}
+
+div#coffee {
+    font-size: 96px;
+    margin: 16px;
+}
+
+span {
+    font-size: 24px;
+}

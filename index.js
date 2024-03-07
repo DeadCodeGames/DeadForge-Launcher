@@ -51,9 +51,21 @@ function updateColorPreference() {
   if (document.querySelector("html").classList.contains("light")) {
     document.querySelector("html").classList.remove("light");
     document.querySelector("html").classList.add("dark");
+    try {
+      document.querySelector("#webiFrame").contentDocument.querySelector("html").classList.remove("light");
+      document.querySelector("#webiFrame").contentDocument.querySelector("html").classList.add("dark");
+    } catch (error) {
+      console.log(error);
+    }
   } else {
     document.querySelector("html").classList.remove("dark");
     document.querySelector("html").classList.add("light");
+    try {
+      document.querySelector("#webiFrame").contentDocument.querySelector("html").classList.remove("dark");
+      document.querySelector("#webiFrame").contentDocument.querySelector("html").classList.add("light");
+    } catch (error) {
+      console.log(error);
+    }
   }
   sendColorPreference();
 }
@@ -71,6 +83,7 @@ ipcRenderer.on('preferences', (event, preferencesData) => {
   const preferences = JSON.parse(preferencesData);
   document.querySelector('html').classList.remove('light', 'dark');
   document.querySelector('html').classList.add(preferences.colorScheme);
+  try { document.querySelector('#webiFrame').contentDocument.querySelector('html').classList.add(preferences.colorScheme); } catch { };
   discordRichPresenceSwitch.checked = preferences.discordRPC;
   if (process.platform !== 'linux') { startupSwitch.checked = preferences.startup } else { startupSwitch.disabled = true };
   betaSwitch.checked = preferences.betaEnabled;
@@ -108,4 +121,14 @@ traySwitch.addEventListener('change', (event) => {
 
 ipcRenderer.on('launcherUpdateDownloadProgress', (event, progress) => {
   document.querySelector('progress#launcherUpdateProgress').setAttribute('value', progress);
+})
+
+setInterval(() => { ipcRenderer.send('checkForConnection') }, 30000);
+ipcRenderer.send('checkForConnection');
+
+ipcRenderer.on('connectionCheck', (event, status) => {
+  document.querySelector('div#onlinestatus').setAttribute('status', status ? 'online' : 'offline');
+  if (document.querySelector('div#updatestatus').getAttribute('status') == 'fail' && status == true) { checkForUpdates(); }
+  if (document.querySelector('iframe#webiFrame').getAttribute('src') != 'https://deadcode.is-a.dev' && status == true) { document.querySelector('iframe#webiFrame').setAttribute('src', 'https://deadcode.is-a.dev'); }
+  else if (document.querySelector('iframe#webiFrame').getAttribute('src') != '418.html' && status == false) { document.querySelector('iframe#webiFrame').setAttribute('src', '418.html'); }
 })

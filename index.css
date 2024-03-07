@@ -258,6 +258,14 @@ div#updatestatus[status="fail"]::after, section#settings div#updatestatusSETTING
     animation: fail 1s steps(1) 0s infinite normal;
 }
 
+div#onlinestatus[status="online"]::after {
+    content: "cloud_done";
+}
+
+div#onlinestatus[status="offline"]::after {
+    content: "cloud_off";
+}
+
 @keyframes fail {
     0% {
         opacity: 1
@@ -267,7 +275,7 @@ div#updatestatus[status="fail"]::after, section#settings div#updatestatusSETTING
     }
 }
 
-div#updatestatus::after {
+div#updatestatus::after, div#onlinestatus::after {
     margin-left: 5px;
     opacity: 1;
 }
@@ -816,7 +824,7 @@ section#settings div.settingsmaincontentbox {
         border-radius: 25px;
     }
     
-    creditpfp, creditpfp>img {
+    creditpfp, creditpfp img, creditpfp object {
         height: 50px;
         border-radius: 25px;
     }
