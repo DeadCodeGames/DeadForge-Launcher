@@ -7,7 +7,7 @@ const fs = require('fs');
 const downloadsFolder = require('downloads-folder');
 const isOnline = require('on-line');
 
-let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate;
+let mainWindow, updateModal, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate;
 function askToQuit() {
   let questionString = 'There '; questionString += Object.keys(currentDownloads).length == 1 ? 'is ' : 'are currently '; questionString += Object.keys(currentDownloads).length; questionString += Object.keys(currentDownloads).length == 1 ? ' item being downloaded:\n' : ' downloads being downloaded:\n'; questionString += currentDownloads.map(item => { const key = Object.keys(item)[0]; const value = item[key]; return `${value.string} ${value.version}`; }).join('\n'); questionString += '\n\nAre you sure you want to quit?'
   dialog.showMessageBox({
@@ -18,19 +18,6 @@ function askToQuit() {
 };
 
 const singleInstanceLock = app.requestSingleInstanceLock();
-
-if (!singleInstanceLock) {
-  app.quit();
-} else {
-  app.on('second-instance', () => {
-    // If a second instance is launched, focus the main window
-    if (mainWindow) {
-        if (mainWindow.isMinimized()) { mainWindow.restore(); }
-        try { mainWindow.show(); } catch (err) { }; mainWindow.focus();
-    }
-});
-}
-
 const createWindow = () => {
   mainWindow = new BrowserWindow({
     minWidth: 555,
@@ -71,6 +58,50 @@ const createWindow = () => {
     return { action: 'deny' };
   });
 }
+
+const createUpdateModal = () => {
+  updateModal = new BrowserWindow({
+    width: 450,
+    height: 300,
+    resizable: false,
+    closable: false,
+    maximizable: false,
+    minimizable: false,
+    frame: false,
+    contextisolation: false,
+    nodeIntegration: true,
+    titleBarStyle: 'hidden',
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      devTools: false
+    },
+    parent: mainWindow,
+    modal: true,
+    show: false
+  });
+
+  require("@electron/remote/main").enable(updateModal.webContents);
+
+  updateModal.setBackgroundMaterial("acrylic");
+  updateModal.setBackgroundColor("#161616");
+
+  updateModal.loadFile('update.html');
+
+  updateModal.on('close', (e) => { e.preventDefault(); });
+}
+
+if (!singleInstanceLock) {
+  app.quit();
+} else {
+  app.on('second-instance', () => {
+    // If a second instance is launched, focus the main window
+    if (mainWindow) {
+        if (mainWindow.isMinimized()) { mainWindow.restore(); }
+        try { mainWindow.show(); } catch (err) { }; mainWindow.focus();
+    }
+});
+
 app.whenReady().then(() => {
   createWindow()
   setTimeout(() => {
@@ -100,7 +131,15 @@ app.whenReady().then(() => {
       };
       let forceQuitAllowed = false;
       app.on('before-quit', (event) => {
-        if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { app.exit(); }
+        if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) {
+          app.exit();
+          if (currentlydownloadedupdate != undefined) {
+            fs.renameSync(path.join(path.join(path.dirname(__dirname), 'app.asar.unpacked'), 'preferences.json'), path.join(downloadsFolder(), 'deadforge.preferences.json'));
+            if (process.platform == "win32") { installerPathGoal = path.join(downloadsFolder(), 'update.exe'); }
+            else if (process.platform == "darwin") { installerPathGoal = path.join(downloadsFolder(), 'update.dmg'); }
+            else if (process.platform == "linux") { installerPathGoal = path.join(downloadsFolder(), 'update.deb'); }
+            shell.openExternal(installerPathGoal);
+          }}
         else { event.preventDefault(); askToQuit(); }
       })
 
@@ -139,6 +178,8 @@ app.whenReady().then(() => {
 app.on('window-all-closed', function () {
   if (process.platform !== 'darwin') app.quit();
 });
+  
+}
 
 
 var version, clientID = "1211721853324890143", rpc = null, startTime = new Date();
@@ -196,7 +237,7 @@ function disableUpdateButton(status) {
 async function checkUpdates() {
   disableUpdateButton(true);
   updateStatus({"status": "checking", "current": version});
-  var JS = await fetch("https://api.github.com/repos/DeadCodeGames/DeadForge/releases").then(response => response.json()).catch(err => { updateStatus({ "status": "fail", "current": version, "latest": undefined, "failType": "check" }); console.error(err) }), assets, downloadLinksByOS = {}, platform, latestversion, installerPath, updateIndex = 0, pendingBetaUpdates = 0;
+  var JS = await fetch("https://api.github.com/repos/DeadCodeGames/DeadForge/releases").then(response => response.json()).catch(err => { updateStatus({ "status": "fail", "current": version, "latest": undefined, "failType": "check" }); console.error(err) }), assets, downloadLinksByOS = {}, platform, latestversion, installerPath, installerPathGoal, updateIndex = 0, pendingBetaUpdates = 0;
   var betaEnabled = JSON.parse(fs.readFileSync(path.join(__dirname, 'preferences.json'), 'utf8')).betaEnabled;
   if (!Array.isArray(JS)) { updateStatus({ "status": "fail", "current": version, "latest": undefined, "failType": "check" }); disableUpdateButton(false); return }
 
@@ -233,7 +274,7 @@ async function checkUpdates() {
   };
 
   async function showInstallDialog(callback) {
-    const options = {
+    /*const options = {
       type: 'question',
       buttons: ['Install Now', 'Install After Closing'],
       defaultId: 0,
@@ -242,18 +283,20 @@ async function checkUpdates() {
       cancelId: 1
     };
   
-    dialog.showMessageBox(null, options).then((result) => { if (result.response == 0) { app.quit(); shell.openExternal(installerPath); }});
+    dialog.showMessageBox(null, options).then((result) => { if (result.response == 0) { app.quit(); shell.openExternal(installerPath); }});*/
+    createUpdateModal(); updateModal.on('ready-to-show', () => { updateModal.webContents.send('updateVersion', latestversion); updateModal.show(); }); 
   }
 
   async function downloadUpdate() {
-    var writer;
-    if (platform == "windows") { installerPath = path.join(downloadsFolder(), 'update.exe'); writer = fs.createWriteStream(installerPath); }
-    else if (platform == "mac") { installerPath = path.join(downloadsFolder(), 'update.dmg'); writer = fs.createWriteStream(installerPath); }
-    else if (platform == "linux") { installerPath = path.join(downloadsFolder(), 'update.deb'); writer = fs.createWriteStream(installerPath); }
+    var writer, updateDownloaded = '';
+    if (currentlydownloadedupdate != undefined) { updateDownloaded = 'x'; }
+    if (platform == "windows") { installerPath = path.join(downloadsFolder(), 'update' + updateDownloaded + '.exe'); writer = fs.createWriteStream(installerPath); }
+    else if (platform == "mac") { installerPath = path.join(downloadsFolder(), 'update' + updateDownloaded + '.dmg'); writer = fs.createWriteStream(installerPath); }
+    else if (platform == "linux") { installerPath = path.join(downloadsFolder(), 'update' + updateDownloaded + '.deb'); writer = fs.createWriteStream(installerPath); }
 
-    app.on('before-quit', () => {
-      
-    })
+    if (platform == "windows") { installerPathGoal = path.join(downloadsFolder(), 'update.exe'); }
+    else if (platform == "mac") { installerPathGoal = path.join(downloadsFolder(), 'update.dmg'); }
+    else if (platform == "linux") { installerPathGoal = path.join(downloadsFolder(), 'update.deb'); }
 
     updateStatus({ "status": "downloading", "current": version, "latest": latestversion });
     currentDownloads.push({ "launcherUpdate": { "string": "DeadForge", "version": latestversion } });
@@ -276,11 +319,11 @@ async function checkUpdates() {
   
     return new Promise((resolve, reject) => {
       writer.on('finish', resolve);
-      writer.on('error', () => { reject; updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); });
+      writer.on('error', () => { reject; updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); currentDownloads.splice(currentDownloads.findIndex(item => Object.keys(item)[0] === 'launcherUpdate'), 1); disableUpdateButton(false); });
     });
   }
 
-  await downloadUpdate().then(() => { currentlydownloadedupdate = latestversion; currentDownloads.splice(currentDownloads.findIndex(item => Object.keys(item)[0] === 'launcherUpdate'), 1); disableUpdateButton(false); updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); { app.on('before-quit', () => { fs.renameSync(path.join(path.join(path.dirname(__dirname), 'app.asar.unpacked'), 'preferences.json'), path.join(downloadsFolder(), 'deadforge.preferences.json')); shell.openExternal(installerPath); }); }; showInstallDialog(); downloadProgress = 0; mainWindow.webContents.send('launcherUpdateDownloadProgress', downloadProgress)}).catch(err => { disableUpdateButton(false); updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
+  await downloadUpdate().then(() => { if (installerPathGoal != undefined) if (installerPath != installerPathGoal) { fs.renameSync(installerPath, installerPathGoal); }; ipcMain.on('update', (event, updateNow) => { console.log(updateNow); if (updateNow == true) { app.quit(); } else {updateModal.destroy();}}); currentlydownloadedupdate = latestversion; currentDownloads.splice(currentDownloads.findIndex(item => Object.keys(item)[0] === 'launcherUpdate'), 1); disableUpdateButton(false); updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); showInstallDialog(); downloadProgress = 0; mainWindow.webContents.send('launcherUpdateDownloadProgress', downloadProgress)}).catch(err => { disableUpdateButton(false); updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
 }
 
   ipcMain.on('color-preference', (event, colorPreference) => {

@@ -1,0 +1,110 @@
+@import url("./fonts/fonts.css");
+
+:root {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+div#window {
+    height: 40px;
+    width: -webkit-fill-available;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    -webkit-app-region: drag;
+    flex-direction: row;
+    flex-wrap: nowrap;
+}
+
+
+div#window>div#title>div#windowlogo {
+    font-family: 'Montserrat';
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    width: 30px;
+    user-select: none;
+    -webkit-user-select: none;
+    padding-right: 10px;
+}
+
+div#window>div#title>div#windowtitle {
+    font-family: 'Uni Sans CAPS', 'Montserrat';
+    font-size: 14px;
+    font-weight: 700;
+    user-select: none;
+    -webkit-user-select: none;
+    text-transform: uppercase;
+}
+
+body {
+    margin: 0;
+}
+
+div#title {
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+    width: -webkit-fill-available;
+}
+
+html {
+    color: white;
+    animation: updateBackground 5s both infinite alternate;
+}
+
+@keyframes updateBackground {
+    0% {
+        background-color: #6495ed;
+    }
+    100% {
+        background-color: #404;
+    }
+}
+
+div#update {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-content: space-around;
+    justify-content: space-evenly;
+    flex-wrap: wrap;
+    height: calc(100% - 40px);
+    font-family: 'Montserrat';
+    font-weight: 700;
+}
+
+div#choices {
+    height: 150px;
+    width: 90%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+div.choice {
+    height: calc(100% - 5px);
+    width: 45%;
+    border: 2.5px white solid;
+    border-radius: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.125s ease-in-out;
+}
+
+div.choice:hover {
+    cursor: pointer;
+    background-color: rgba(255, 255, 255, 0.404);
+}
+
+choiceicon {
+    font-size: 72px !important;
+    margin-bottom: 12px;
+}
+
+choicetext {
+    font-size: 12px;
+}
