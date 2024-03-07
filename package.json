@@ -1,6 +1,6 @@
 {
   "name": "deadforge",
-  "version": "v1.2.0Alpha",
+  "version": "v1.2.0Beta",
   "description": "An Electron Launcher for DeadCode Projects.",
   "main": "main.js",
   "scripts": {
@@ -13,7 +13,7 @@
   "repository": "github:DeadCodeGames/DeadForge",
   "devDependencies": {
     "electron": "^29.0.1",
-    "electron-builder": "^24.12.0"
+    "electron-builder": "^24.13.3"
   },
   "build": {
     "appId": "dev.deadcode.forge",
@@ -40,6 +40,7 @@
     "child_process": "^1.0.2",
     "discord-rpc": "^4.0.1",
     "downloads-folder": "^3.0.3",
-    "node-fetch": "^3.3.2"
+    "node-fetch": "^3.3.2",
+    "on-line": "^0.1.1"
   }
 }

@@ -5,8 +5,9 @@ const path = require('node:path');
 const axios = require('axios');
 const fs = require('fs');
 const downloadsFolder = require('downloads-folder');
+const isOnline = require('on-line');
 
-let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [];
+let mainWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState;
 function askToQuit() {
   let questionString = 'There '; questionString += Object.keys(currentDownloads).length == 1 ? 'is ' : 'are currently '; questionString += Object.keys(currentDownloads).length; questionString += Object.keys(currentDownloads).length == 1 ? ' item being downloaded:\n' : ' downloads being downloaded:\n'; questionString += currentDownloads.map(item => { const key = Object.keys(item)[0]; const value = item[key]; return `${value.string} ${value.version}`; }).join('\n'); questionString += '\n\nAre you sure you want to quit?'
   dialog.showMessageBox({
@@ -160,6 +161,8 @@ function connectRPC() {
     rpc.destroy();
   }
 
+  if (onlineState == false) return;
+
   rpc = new DiscordRPC.Client({ transport: 'ipc' });
 
   rpc.on('ready', () => {
@@ -311,4 +314,8 @@ async function checkUpdates() {
     preferences.closeToTray = trayPreference;
     if (trayPreference == false) { tray.destroy() } else { tray = tray = new Tray(process.platform == 'darwin' ? path.join(__dirname, 'res', 'DEADFORGE.icon.Template.png') : path.join(__dirname, 'res', 'DEADFORGE.icon.png')); tray.setContextMenu(contextMenuVisible) };
     writePreferences()
+  })
+
+  ipcMain.on('checkForConnection', (event) => {
+    isOnline(function (error, online) { onlineState = online; mainWindow.webContents.send('connectionCheck', online) });
   })
