@@ -1,6 +1,6 @@
 {
   "name": "deadforge",
-  "version": "v1.2.0Beta",
+  "version": "v1.2.0Gamma",
   "description": "An Electron Launcher for DeadCode Projects.",
   "main": "main.js",
   "scripts": {
