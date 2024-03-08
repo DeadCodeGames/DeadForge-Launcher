@@ -1,6 +1,6 @@
 {
   "name": "deadforge",
-  "version": "v1.2.1",
+  "version": "v1.2.2",
   "description": "An Electron Launcher for DeadCode Projects.",
   "main": "main.js",
   "scripts": {
@@ -32,10 +32,7 @@
     "linux": {
       "target": "deb",
       "artifactName": "dev.deadcode.forge-${version}.${ext}"
-    },
-    "asarUnpack": [
-      "preferences.json"
-    ]
+    }
   },
   "dependencies": {
     "@electron/remote": "^2.1.2",

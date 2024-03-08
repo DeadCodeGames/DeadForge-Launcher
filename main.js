@@ -8,7 +8,7 @@ const fs = require('fs');
 const downloadsFolder = require('downloads-folder');
 const isOnline = require('on-line');
 
-let mainWindow, updateModal, quitConfirm, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate;
+let mainWindow, updateModal, quitConfirm, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences = { "colorScheme": "dark","discordRPC": true,"startup": false,"betaEnabled": true,"closeToTray": true }, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate;
 function askToQuit() {
   /*let questionString = 'There '; questionString += Object.keys(currentDownloads).length == 1 ? 'is ' : 'are currently '; questionString += Object.keys(currentDownloads).length; questionString += Object.keys(currentDownloads).length == 1 ? ' item being downloaded:\n' : ' downloads being downloaded:\n'; questionString += currentDownloads.map(item => { const key = Object.keys(item)[0]; const value = item[key]; return `${value.string} ${value.version}`; }).join('\n'); questionString += '\n\nAre you sure you want to quit?'
   dialog.showMessageBox({
@@ -149,18 +149,7 @@ if (!singleInstanceLock) {
 app.whenReady().then(() => {
   createWindow()
   setTimeout(() => {
-    if (fs.existsSync(path.join(downloadsFolder(), 'deadforge.preferences.json'))) {
-      const preferencesBackupData = fs.readFileSync(path.join(downloadsFolder(), 'deadforge.preferences.json'), 'utf8');
-      const preferencesBackup = JSON.parse(preferencesBackupData);
-
-      const requiredKeys = ['colorScheme', 'discordRPC', 'startup', 'betaEnabled'];
-      const missingKeys = requiredKeys.filter(key => !(key in preferencesBackup));
-
-      if (missingKeys.length === 0) {
-        fs.renameSync(path.join(downloadsFolder(), 'deadforge.preferences.json'), path.join(path.join(path.dirname(__dirname), 'app.asar.unpacked'), 'preferences.json'));
-      }
-    }
-    fs.readFile(path.join(__dirname, 'preferences.json'), 'utf8', (err, data) => {
+    fs.readFile(path.join(app.getPath('userData'), 'preferences.json'), 'utf8', (err, data) => {
       if (err) {
           console.error('Error reading preferences file:', err);
           return;
@@ -178,7 +167,6 @@ app.whenReady().then(() => {
         if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) {
           app.exit();
           if (currentlydownloadedupdate != undefined) {
-            fs.renameSync(path.join(path.join(path.dirname(__dirname), 'app.asar.unpacked'), 'preferences.json'), path.join(downloadsFolder(), 'deadforge.preferences.json'));
             if (process.platform == "win32") { installerPathGoal = path.join(downloadsFolder(), 'update.exe'); }
             else if (process.platform == "darwin") { installerPathGoal = path.join(downloadsFolder(), 'update.dmg'); }
             else if (process.platform == "linux") { installerPathGoal = path.join(downloadsFolder(), 'update.deb'); }
@@ -282,7 +270,7 @@ async function checkUpdates() {
   disableUpdateButton(true);
   updateStatus({"status": "checking", "current": version});
   var JS = await fetch("https://api.github.com/repos/DeadCodeGames/DeadForge/releases").then(response => response.json()).catch(err => { updateStatus({ "status": "fail", "current": version, "latest": undefined, "failType": "check" }); console.error(err) }), assets, downloadLinksByOS = {}, platform, latestversion, installerPath, installerPathGoal, updateIndex = 0, pendingBetaUpdates = 0;
-  var betaEnabled = JSON.parse(fs.readFileSync(path.join(__dirname, 'preferences.json'), 'utf8')).betaEnabled;
+  var betaEnabled = JSON.parse(fs.readFileSync(path.join(app.getPath('userData'), 'preferences.json'), 'utf8')).betaEnabled;
   if (!Array.isArray(JS)) { updateStatus({ "status": "fail", "current": version, "latest": undefined, "failType": "check" }); disableUpdateButton(false); return }
 
   for (updateIndex; updateIndex < JS.length; updateIndex++) {
@@ -399,7 +387,7 @@ async function checkUpdates() {
   function writePreferences() {
     const jsonData = JSON.stringify(preferences, null, 2);
 
-    fs.writeFile(path.join(__dirname, 'preferences.json'), jsonData, 'utf8', (err) => {
+    fs.writeFile(path.join(app.getPath('userData'), 'preferences.json'), jsonData, 'utf8', (err) => {
       if (err) {
         console.error('preferences', err);
         return;
