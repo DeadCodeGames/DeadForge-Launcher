@@ -1,6 +1,6 @@
 {
   "name": "deadforge",
-  "version": "v1.2.0",
+  "version": "v1.2.1",
   "description": "An Electron Launcher for DeadCode Projects.",
   "main": "main.js",
   "scripts": {
@@ -8,7 +8,10 @@
   },
   "keywords": [],
   "author": "DeadCodeGames <404@mail.deadcode.is-a.dev> (https://deadcode.is-a.dev)",
-  "contributors": ["Richard Kanshen <kanshen@mail.deadcode.is-a.dev> (https://kanshen.click)", "QlexcTheFox <80660200+musiconstereo@users.noreply.github.com> (https://github.com/MusicOnStereo)"],
+  "contributors": [
+    "Richard Kanshen <kanshen@mail.deadcode.is-a.dev> (https://kanshen.click)",
+    "QlexcTheFox <80660200+musiconstereo@users.noreply.github.com> (https://github.com/MusicOnStereo)"
+  ],
   "license": "BSD-3-Clause",
   "repository": "github:DeadCodeGames/DeadForge",
   "devDependencies": {
@@ -40,6 +43,7 @@
     "child_process": "^1.0.2",
     "discord-rpc": "^4.0.1",
     "downloads-folder": "^3.0.3",
+    "electron-window-state": "^5.0.3",
     "node-fetch": "^3.3.2",
     "on-line": "^0.1.1"
   }

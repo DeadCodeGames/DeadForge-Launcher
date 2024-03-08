@@ -1,5 +1,6 @@
 const { app, BrowserWindow, shell, dialog, ipcMain, Menu, Tray } = require('electron');
 require('@electron/remote/main').initialize()
+const windowStateKeeper = require('electron-window-state');
 const DiscordRPC = require('discord-rpc');
 const path = require('node:path');
 const axios = require('axios');
@@ -22,11 +23,17 @@ function askToQuit() {
 
 const singleInstanceLock = app.requestSingleInstanceLock();
 const createWindow = () => {
+  let mainWindowState = windowStateKeeper({
+    defaultHeight: 600,
+    defaultWidth: 800,
+    maximize: true
+  })
+
   mainWindow = new BrowserWindow({
     minWidth: 555,
     minHeight: 350,
-    height: 600,
-    width: 800,
+    height: mainWindowState.height,
+    width: mainWindowState.width,
     frame: false,
     contextisolation: false,
     nodeIntegration: true,
@@ -48,6 +55,7 @@ const createWindow = () => {
     { label: 'Quit', click: () => app.quit() }
   ]);
 
+  mainWindowState.manage(mainWindow);
 
   require("@electron/remote/main").enable(mainWindow.webContents);
 
