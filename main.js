@@ -1,4 +1,4 @@
-const { app, BrowserWindow, shell, dialog, ipcMain, Menu, Tray } = require('electron');
+const { app, BrowserWindow, shell, dialog, ipcMain, Menu, Tray, screen } = require('electron');
 require('@electron/remote/main').initialize()
 const windowStateKeeper = require('electron-window-state');
 const DiscordRPC = require('discord-rpc');
@@ -8,7 +8,7 @@ const fs = require('fs');
 const downloadsFolder = require('downloads-folder');
 const isOnline = require('on-line');
 
-let mainWindow, updateModal, quitConfirm, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences = { "colorScheme": "dark","discordRPC": true,"startup": false,"betaEnabled": true,"closeToTray": true }, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate;
+let mainWindow, updateModal, quitConfirm, notificationWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences = { "colorScheme": "dark","discordRPC": true,"startup": false,"betaEnabled": true,"closeToTray": true }, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate, notificationQ = [], isNotificationShowing = false;
 function askToQuit() {
   /*let questionString = 'There '; questionString += Object.keys(currentDownloads).length == 1 ? 'is ' : 'are currently '; questionString += Object.keys(currentDownloads).length; questionString += Object.keys(currentDownloads).length == 1 ? ' item being downloaded:\n' : ' downloads being downloaded:\n'; questionString += currentDownloads.map(item => { const key = Object.keys(item)[0]; const value = item[key]; return `${value.string} ${value.version}`; }).join('\n'); questionString += '\n\nAre you sure you want to quit?'
   dialog.showMessageBox({
@@ -197,7 +197,7 @@ app.whenReady().then(() => {
         }
       });
   });
-    checkUpdates()
+    checkUpdates();
     setInterval(checkUpdates, 10 * 60 * 1000);
   }, 2500)
 
@@ -333,7 +333,9 @@ async function checkUpdates() {
     updateStatus({ "status": "downloading", "current": version, "latest": latestversion });
     currentDownloads.push({ "launcherUpdate": { "string": "DeadForge", "version": latestversion } });
     var downloadProgress = 0;
-  
+
+    createNotification({ "title": "Launcher Update", "message": "Downloading update " + latestversion });
+
     const response = await axios({
       url: downloadLinksByOS[platform],
       method: 'GET',
@@ -355,7 +357,7 @@ async function checkUpdates() {
     });
   }
 
-  await downloadUpdate().then(() => { if (installerPathGoal != undefined) if (installerPath != installerPathGoal) { fs.renameSync(installerPath, installerPathGoal); }; ipcMain.on('update', (event, updateNow) => { console.log(updateNow); if (updateNow == true) { app.quit(); } else {updateModal.destroy();}}); currentlydownloadedupdate = latestversion; currentDownloads.splice(currentDownloads.findIndex(item => Object.keys(item)[0] === 'launcherUpdate'), 1); disableUpdateButton(false); updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); showInstallDialog(); downloadProgress = 0; mainWindow.webContents.send('launcherUpdateDownloadProgress', downloadProgress)}).catch(err => { disableUpdateButton(false); updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
+  await downloadUpdate().then(() => { if (installerPathGoal != undefined) if (installerPath != installerPathGoal) { fs.renameSync(installerPath, installerPathGoal); }; ipcMain.on('update', (event, updateNow) => { console.log(updateNow); if (updateNow == true) { app.quit(); } else { updateModal.destroy(); } }); currentlydownloadedupdate = latestversion; currentDownloads.splice(currentDownloads.findIndex(item => Object.keys(item)[0] === 'launcherUpdate'), 1); disableUpdateButton(false); updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); showInstallDialog(); downloadProgress = 0; mainWindow.webContents.send('launcherUpdateDownloadProgress', downloadProgress);}).catch(err => { disableUpdateButton(false); updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
 }
 
   ipcMain.on('color-preference', (event, colorPreference) => {
@@ -408,3 +410,60 @@ async function checkUpdates() {
   ipcMain.on('checkForConnection', (event) => {
     isOnline(function (error, online) { onlineState = online; mainWindow.webContents.send('connectionCheck', online) });
   })
+
+const notificationCallbacks = {
+
+  }
+
+function createNotification(notificationData) {
+  notificationQ.push(notificationData);
+
+  if (isNotificationShowing) return;
+
+  showNextNotification();
+}
+
+function showNextNotification() {
+  if (notificationQ.length == 0) {
+    isNotificationShowing = false;
+    return;
+  };
+
+  const notificationData = notificationQ.shift();
+
+  notificationWindow = new BrowserWindow({
+    x: screen.getPrimaryDisplay().bounds.width - 375,
+    y: 25,
+    width: 350,
+    height: 200,
+    resizable: false,
+    closable: false,
+    maximizable: false,
+    minimizable: false,
+    frame: false,
+    transparent: true,
+    show: false,
+    alwaysOnTop: true,
+    skipTaskbar: true,
+    webPreferences: {
+      nodeIntegration: true,
+      contextIsolation: false,
+      devTools: false
+    }
+  });
+  
+  require("@electron/remote/main").enable(notificationWindow.webContents);
+
+  notificationWindow.loadFile('notification.html');
+
+  notificationWindow.webContents.on('did-finish-load', () => { 
+    notificationWindow.webContents.send('notification', notificationData);
+    notificationWindow.show();
+  });
+
+  ipcMain.on('notificationclose', (event, notificationCallback) => {
+    notificationWindow.destroy();
+    if (notificationCallbacks[notificationCallback] != undefined && notificationCallback != null) { notificationCallbacks[notificationCallback](); }
+    showNextNotification();
+  })
+}
