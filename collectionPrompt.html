@@ -1,0 +1,29 @@
+<html>
+    <head>
+        <link rel="stylesheet" href="collectionPrompt.css">
+        <title>create a new collection</title>
+    </head>
+    <body>
+        <div id="window">
+            <div id="title">
+                <div id="windowlogo">××</div><div id="windowtitle">deadforge</div></div>
+            </div>
+        </div>
+        <div id="prompt">
+            <div id="promptmessage">What is the name of the collection?</div>
+            <div id="promptinput">
+                <input id="collectionNameInput" type="text" minlength="1" maxlength="32" size="32" autofocus oninput="this.value.length < 1 ? document.querySelector('#error').innerHTML = '<span class=\'material-symbols\'>error</span><span id=\'errorText\'>Collection name cannot be of length 0.</span>' : document.querySelector('span#error').innerHTML = '<span class=\'material-symbols\'></span><span id=\'errorText\'></span>'">
+                <span id="error"><span class='material-symbols'></span><span id='errorText'></span></span>
+            </div>
+            <div id="choices">
+                <div class="choice" id="choicenow" onclick="cancelPrompt()">
+                    <choicetext>Cancel</choicetext>
+                </div>
+                <div class="choice" id="choiceclose" onclick="confirmPrompt(document.querySelector('#collectionNameInput').value)">
+                    <choicetext>Confirm</choicetext>
+                </div>
+            </div>
+        </div>
+    </body>
+    <script src="collectionPrompt.js"></script>
+</html>

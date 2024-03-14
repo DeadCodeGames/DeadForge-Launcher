@@ -1,4 +1,5 @@
 @import url("./fonts/fonts.css");
+@import url("./animations.css");
 
 :root {
     user-select: none;
@@ -51,16 +52,7 @@ div#title {
 
 html {
     color: white;
-    animation: updateBackground 5s both infinite alternate;
-}
-
-@keyframes updateBackground {
-    0% {
-        background-color: #6495ed;
-    }
-    100% {
-        background-color: #404;
-    }
+    animation: cfbcnfbackground 5s both infinite alternate;
 }
 
 div#update {

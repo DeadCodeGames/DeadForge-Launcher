@@ -1,6 +1,6 @@
 {
   "name": "deadforge",
-  "version": "v1.3.0",
+  "version": "v1.4.0Alpha",
   "description": "An Electron Launcher for DeadCode Projects.",
   "main": "main.js",
   "scripts": {
@@ -41,6 +41,7 @@
     "discord-rpc": "^4.0.1",
     "downloads-folder": "^3.0.3",
     "electron-window-state": "^5.0.3",
+    "follow-redirects": "^1.15.6",
     "node-fetch": "^3.3.2",
     "on-line": "^0.1.1"
   }

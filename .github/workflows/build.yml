@@ -8,7 +8,7 @@ on:
 jobs:
   release:
     runs-on: windows-latest
-
+    environment: windows
     steps:
       - name: Check out Git repository
         uses: actions/checkout@v1

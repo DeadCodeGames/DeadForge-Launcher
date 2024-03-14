@@ -46,6 +46,7 @@ div#notificationheader, div#notificationheader>:not(div#notificationclose) {
 
 div#notificationclose {
     -webkit-app-region: no-drag;
+    cursor: pointer;
 }
 
 left {
