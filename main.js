@@ -8,7 +8,8 @@ const fs = require('fs');
 const downloadsFolder = require('downloads-folder');
 const isOnline = require('on-line');
 
-let mainWindow, updateModal, quitConfirm, notificationWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, changeColorMode = (color) => { mainWindow.webContents.send('changeColorMode', color); }, preferences = { "colorScheme": "dark","discordRPC": true,"startup": false,"betaEnabled": true,"closeToTray": true }, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate, notificationQ = [], isNotificationShowing = false;
+let mainWindow, updateModal, quitConfirm, notificationWindow, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate, notificationQ = [], isNotificationShowing = false;
+let preferences = { "colorScheme": "dark", "discordRPC": true, "startup": false, "betaEnabled": false, "closeToTray": true, "menubarCollapsed": false, "libraryStyle": "grid", "librarySort": "nameAscending", "currentLibCollection": null }, collectionsData = {"favourites": [], "collections": {}};
 function askToQuit() {
   /*let questionString = 'There '; questionString += Object.keys(currentDownloads).length == 1 ? 'is ' : 'are currently '; questionString += Object.keys(currentDownloads).length; questionString += Object.keys(currentDownloads).length == 1 ? ' item being downloaded:\n' : ' downloads being downloaded:\n'; questionString += currentDownloads.map(item => { const key = Object.keys(item)[0]; const value = item[key]; return `${value.string} ${value.version}`; }).join('\n'); questionString += '\n\nAre you sure you want to quit?'
   dialog.showMessageBox({
@@ -149,54 +150,65 @@ if (!singleInstanceLock) {
 app.whenReady().then(() => {
   createWindow()
   setTimeout(() => {
-    fs.readFile(path.join(app.getPath('userData'), 'preferences.json'), 'utf8', (err, data) => {
+    fs.readFile(path.join(app.getPath('userData'), 'collections.json'), 'utf8', (err, data) => {
       if (err) {
-          console.error('Error reading preferences file:', err);
-          return;
+        console.error('Error reading collections file:', err);
       }
 
-      mainWindow.webContents.send('preferences', data);
-      preferences = JSON.parse(data);
-      preferences.discordRPC ? connectRPC() : null;
-      if (preferences.closeToTray == true) {
-        tray = new Tray(process.platform == 'darwin' ? path.join(__dirname, 'res', 'DEADFORGE.icon.Template.png') : path.join(__dirname, 'res', 'DEADFORGE.icon.png'));
-        tray.setContextMenu(contextMenuVisible);
-      };
-      let forceQuitAllowed = false;
-      app.on('before-quit', (event) => {
-        if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) {
-          app.exit();
-          if (currentlydownloadedupdate != undefined) {
-            if (process.platform == "win32") { installerPathGoal = path.join(downloadsFolder(), 'update.exe'); }
-            else if (process.platform == "darwin") { installerPathGoal = path.join(downloadsFolder(), 'update.dmg'); }
-            else if (process.platform == "linux") { installerPathGoal = path.join(downloadsFolder(), 'update.deb'); }
-            shell.openExternal(installerPathGoal);
-          }}
-        else { event.preventDefault(); askToQuit(); }
-      })
-
-      ipcMain.on('close', (event) => {
-        if (!app.isQuiting && preferences.closeToTray == true) {
-          event.preventDefault();
-          mainWindow.hide(); 
-          tray.setContextMenu(contextMenuHidden);
-        } else {
-          if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { mainWindow.destroy(); }
-          else { event.preventDefault(); askToQuit(); }
+      mainWindow.webContents.send('collections', data);
+      collectionsData = JSON.parse(data);
+      fs.readFile(path.join(app.getPath('userData'), 'preferences.json'), 'utf8', (err, data) => {
+        if (err) {
+            console.error('Error reading preferences file:', err);
+            return;
         }
-      });
-
-      mainWindow.on('close', (event) => {
-        if (!app.isQuiting && preferences.closeToTray == true) {
-          event.preventDefault();
-          mainWindow.hide(); 
-          tray.setContextMenu(contextMenuHidden);
-        } else {
-          if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { mainWindow.destroy(); }
+  
+        mainWindow.webContents.send('preferences', data);
+        Object.keys(JSON.parse(data)).forEach((key) => {
+          preferences[key] = JSON.parse(data)[key];
+        })
+        preferences.discordRPC ? connectRPC() : null;
+        if (preferences.closeToTray == true) {
+          tray = new Tray(process.platform == 'darwin' ? path.join(__dirname, 'res', 'DEADFORGE.icon.Template.png') : path.join(__dirname, 'res', 'DEADFORGE.icon.png'));
+          tray.setContextMenu(contextMenuVisible);
+        };
+        let forceQuitAllowed = false;
+        app.on('before-quit', (event) => {
+          if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) {
+            app.exit();
+            if (currentlydownloadedupdate != undefined) {
+              if (process.platform == "win32") { installerPathGoal = path.join(downloadsFolder(), 'update.exe'); }
+              else if (process.platform == "darwin") { installerPathGoal = path.join(downloadsFolder(), 'update.dmg'); }
+              else if (process.platform == "linux") { installerPathGoal = path.join(downloadsFolder(), 'update.deb'); }
+              shell.openExternal(installerPathGoal);
+            }}
           else { event.preventDefault(); askToQuit(); }
-        }
-      });
-  });
+        })
+  
+        ipcMain.on('close', (event) => {
+          if (preferences == undefined || preferences.closeToTray == undefined) { app.quit()}
+          else if (!app.isQuiting && preferences.closeToTray == true) {
+            event.preventDefault();
+            mainWindow.hide(); 
+            tray.setContextMenu(contextMenuHidden);
+          } else {
+            if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { mainWindow.destroy(); }
+            else { event.preventDefault(); askToQuit(); }
+          }
+        });
+  
+        mainWindow.on('close', (event) => {
+          if (!app.isQuiting && preferences.closeToTray == true) {
+            event.preventDefault();
+            mainWindow.hide(); 
+            tray.setContextMenu(contextMenuHidden);
+          } else {
+            if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { mainWindow.destroy(); }
+            else { event.preventDefault(); askToQuit(); }
+          }
+        });
+    });
+    })
     checkUpdates();
     setInterval(checkUpdates, 10 * 60 * 1000);
   }, 2500)
@@ -357,7 +369,7 @@ async function checkUpdates() {
     });
   }
 
-  await downloadUpdate().then(() => { if (installerPathGoal != undefined) if (installerPath != installerPathGoal) { fs.renameSync(installerPath, installerPathGoal); }; ipcMain.on('update', (event, updateNow) => { console.log(updateNow); if (updateNow == true) { app.quit(); } else { updateModal.destroy(); } }); currentlydownloadedupdate = latestversion; currentDownloads.splice(currentDownloads.findIndex(item => Object.keys(item)[0] === 'launcherUpdate'), 1); disableUpdateButton(false); updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); showInstallDialog(); downloadProgress = 0; mainWindow.webContents.send('launcherUpdateDownloadProgress', downloadProgress);}).catch(err => { disableUpdateButton(false); updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
+  await downloadUpdate().then(() => { if (installerPathGoal != undefined) if (installerPath != installerPathGoal) { fs.renameSync(installerPath, installerPathGoal); }; ipcMain.on('update', (event, updateNow) => { if (updateNow == true) { app.quit(); } else { updateModal.destroy(); } }); currentlydownloadedupdate = latestversion; currentDownloads.splice(currentDownloads.findIndex(item => Object.keys(item)[0] === 'launcherUpdate'), 1); disableUpdateButton(false); updateStatus({ 'status': 'downloaded', 'current': version, 'latest': latestversion }); showInstallDialog(); downloadProgress = 0; mainWindow.webContents.send('launcherUpdateDownloadProgress', downloadProgress);}).catch(err => { disableUpdateButton(false); updateStatus({"status": "fail", "current": version, "latest": latestversion, "failType": "download"}); console.error(err) });
 }
 
   ipcMain.on('color-preference', (event, colorPreference) => {
@@ -466,4 +478,48 @@ function showNextNotification() {
     if (notificationCallbacks[notificationCallback] != undefined && notificationCallback != null) { notificationCallbacks[notificationCallback](); }
     showNextNotification();
   })
+}
+
+ipcMain.on("sidebarCollapse", (event, collapsed) => {
+  preferences.menubarCollapsed = collapsed;
+  writePreferences();
+});
+
+ipcMain.on("changeLibraryView", (event, view) => {
+  preferences.libraryStyle = view;
+  writePreferences();
+});
+
+ipcMain.on("changeLibrarySort", (event, sort) => {
+  preferences.librarySort = sort;
+  writePreferences();
+});
+
+ipcMain.on("changeLibraryCollection", (event, collection) => {
+  preferences.currentLibCollection = collection;
+  writePreferences();
+});
+
+ipcMain.on("toggleFavourite", (event, game) => {
+  if (collectionsData.favourites.includes(game) == false) {
+    collectionsData.favourites.push(game);
+  } else if (collectionsData.favourites.includes(game) == true) {
+    collectionsData.favourites.splice(collectionsData.favourites.indexOf(game), 1);
+  }
+  writeCollections();
+})
+
+function writeCollections() {
+  const jsonData = JSON.stringify(collectionsData, null, 2);
+
+  fs.writeFile(path.join(app.getPath('userData'), 'collections.json'), jsonData, 'utf8', (err) => {
+    if (err) {
+      console.error('collections', err);
+      return;
+    }
+  });
+  setTimeout(() => {
+    mainWindow.webContents.send('collections', jsonData);
+    mainWindow.webContents.send('preferences', JSON.stringify(preferences));
+  }, 250)
 }
