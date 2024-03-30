@@ -5,7 +5,7 @@ const minimizeBtn = document.querySelector("div#window>div#controls>div#minimize
 const maximizeBtn = document.querySelector("div#window>div#controls>div#maximize");
 const closeBtn = document.querySelector("div#window>div#controls>div#close");
 
-var Collections, fixcontextmenu = { "ConRPG": false, "RestoreBackup?": false };
+var Collections, fixcontextmenu = { "ConRPG": false, "RestoreBackup?": false }, lightsout = false;
 
 minimizeBtn.addEventListener('click', () => {
     const window = BrowserWindow.getFocusedWindow();
@@ -273,3 +273,45 @@ function createCollection(game = undefined) {
 function toggleCollection(game, collection) {
     ipcRenderer.send('toggleCollection', game, collection);
 }
+
+document.addEventListener("keydown", (event) => {
+  if (event.ctrlKey && event.key == "r") { event.preventDefault(); if (lightsout == false){ipcRenderer.send('refresh');} }
+})
+
+let clicktimeouts = [];
+
+const droneStartSFX = new Audio("res/droneStart.wav");
+const droneSFX = new Audio("res/drone.wav");
+const lightbulbSFX = new Audio("res/lightbulbhum.wav");
+
+function handleButtonClick() {
+  if (clicktimeouts.length >= 10) {
+    ipcRenderer.send('amoledmode');
+    lightsout = true;
+    document.addEventListener('keydown', (event) => {
+      if (event.key == "F11" || (event.altKey && event.key == "F4") || (event.ctrlKey && event.key == "r")) { event.preventDefault(); }
+    });
+    droneStartSFX.play();
+    droneSFX.play();
+    document.querySelector("html").classList.remove("dark", "light"); document.querySelector("html").classList.add("amoled");
+    setTimeout(() => {
+      lightbulbCSS.generateKeyframes({ animationName: "flicker" }, { selector: "div#void" });
+      lightbulbSFX.play();
+      lightbulbSFX.loop = true;
+      setTimeout(() => {
+        ipcRenderer.send('achievement', 'deadforge', 'darkwasnotenough', true);
+      }, 666000)
+      setInterval(() => {
+        lightbulbCSS.generatePoints({selector: "div#void"});
+      }, 750)
+    }, 5000)
+  };
+
+  const timeout = setTimeout(() => {
+      clicktimeouts = clicktimeouts.filter(t => t !== timeout);
+  }, 2500);
+
+  clicktimeouts.push(timeout);
+}
+
+document.querySelector('div#switchColorMode').addEventListener('click', handleButtonClick);

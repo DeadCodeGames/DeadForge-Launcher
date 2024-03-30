@@ -1,0 +1,26 @@
+html.amoled>body>* {
+    display: none;
+}
+
+div#void {
+    display: none;
+}
+
+html.amoled>body>div#void {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: black;
+    color: white;
+}
+
+html.amoled>body>div#void>lightbulb {
+    opacity: 0;
+    font-size: 96px;
+    color: #ffffff;
+    top: -50px;
+    position: relative;
+    text-shadow: 0px 10px 50px white;
+    animation: flicker 0.75s linear infinite;
+}

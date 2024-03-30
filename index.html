@@ -1,6 +1,7 @@
 <html class="dark">
     <head>
         <link rel="stylesheet" href="index.css" />
+        <link rel="stylesheet" href="lightbulb.css" />
         <title>× deadforge ×</title>
     </head>
     <body>
@@ -102,7 +103,7 @@
                         </div>
                     </div>
                 </section>
-                <section id="library">
+                <section id="library" viewstyle="grid">
                     <subsection id="libraryHeader">
                             <div class="collection-container">
                                 <label for="collectionSelect">Collection</label>
@@ -134,7 +135,7 @@
                     </subsection>
                     <games>
                         <gamesection id="con" data-gametitle="ConRPG" data-gamedor="2024XXXX" data-currentcollection="true" oncontextmenu="openContextMenu(event, 'ConRPG')">
-                            <blank><button class="disabled">Coming 2024</button></blank>
+                            <blank><button onclick="document.querySelector('#content').setAttribute('current', 'game'); document.querySelector('section#game').setAttribute('game', 'conrpg');">Coming 2024</button></blank>
                             <info>
                                 <div class="gametitle">ConRPG <label class="favourite-checkbox"><input type="checkbox" onchange="toggleFavourite('ConRPG')"><span class="favourite-checkbox-label material-symbols">favorite_border</span></label></div>
                                 <div class="gamesubtitle">An RPG in your Terminal, made with C++</div>
@@ -177,7 +178,7 @@
                             </div>
                         </contextmenu>
                         <gamesection id="restorebackup" data-gametitle="RestoreBackup?" data-gamedor="2025XXXX" data-currentcollection="true" oncontextmenu="openContextMenu(event, 'RestoreBackup?')">
-                            <blank><a href="https://deadcode.is-a.dev/RestoreBackup" target="_blank"><button class="disabled">Coming 2025</button></a></blank>
+                            <blank><button onclick="document.querySelector('#content').setAttribute('current', 'game'); document.querySelector('section#game').setAttribute('game', 'restorebackup');">Coming 2025</button></blank>
                             <info>
                                 <div class="gametitle">RestoreBackup? <label class="favourite-checkbox"><input type="checkbox" onchange="toggleFavourite('RestoreBackup?')"><span class="favourite-checkbox-label material-symbols">favorite_border</span></label></div>
                                 <div class="gamesubtitle">That computer is hiding a lot more than what is on the surface.</div>
@@ -221,8 +222,84 @@
                         </contextmenu>
                     </games>
                 </section>
+                <section id="game">
+                    <subsection id="conrpg">
+                        <div class="banner"><span>ConRPG</span></div>
+                        <div class="game-info">
+                            <button id="playButton" class="disabled">Coming 2024</button>
+                            <div class="game-stats">
+                                <div class="gamestats">
+                                    <div class="gamestaticon material-symbols">history</div>
+                                    <div class="gamestattext">
+                                        <div class="gamestattitle">Last Played</div>
+                                        <div class="gamestatvalue">Never</div>
+                                    </div>
+                                </div>
+                            <div class="gamestats">
+                                <div class="gamestaticon material-symbols">timer</div>
+                                <div class="gamestattext">
+                                    <div class="gamestattitle">Play time</div>
+                                    <div class="gamestatvalue">0 Hours</div>
+                                </div>
+                            </div>
+                            <div class="gamestats">
+                                <div class="gamestaticon material-symbols">trophy</div>
+                                <div class="gamestattext">
+                                    <div class="gamestattitle">Achievements</div>
+                                    <div class="gamestatvalue">0/???</div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="game-links">
+                            <ul>
+                                <li><a href="https://dead404code.itch.io/conrpg" target="_blank">Donate on itch.io</a></li>
+                                <li><a href="https://deadcode.is-a.dev/ConRPG" target="_blank">Web</a></li>
+                            </ul>
+                        </div>
+                    </subsection>
+                    <subsection id="restorebackup">
+                        <div class="banner"><span>RestoreBackup?</span></div>
+                        <div class="game-info">
+                            <button id="playButton" class="disabled">Coming 2025</button>
+                            <div class="game-stats">
+                                <div class="gamestats">
+                                    <div class="gamestaticon material-symbols">history</div>
+                                    <div class="gamestattext">
+                                        <div class="gamestattitle">Last Played</div>
+                                        <div class="gamestatvalue">Never</div>
+                                    </div>
+                                </div>
+                            <div class="gamestats">
+                                <div class="gamestaticon material-symbols">timer</div>
+                                <div class="gamestattext">
+                                    <div class="gamestattitle">Play time</div>
+                                    <div class="gamestatvalue">0 Hours</div>
+                                </div>
+                            </div>
+                            <div class="gamestats">
+                                <div class="gamestaticon material-symbols">trophy</div>
+                                <div class="gamestattext">
+                                    <div class="gamestattitle">Achievements</div>
+                                    <div class="gamestatvalue">0/???</div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                        <div class="game-links">
+                            <ul>
+                                <li><a href="https://dead404code.itch.io/restorebackup" target="_blank">Donate on itch.io</a></li>
+                                <li><a href="https://deadcode.is-a.dev/RestoreBackup" target="_blank">Web</a></li>
+                            </ul>
+                        </div>
+                    </subsection>
+                </section>
             </div>
+        </div>
+        <div id="void">
+            <lightbulb class="material-symbols">lightbulb</lightbulb>
         </div>
     </body>
     <script src="index.js"></script>
+    <script src="node_modules/@dead404code/lightbulbcss/index.js"></script>
 </html>

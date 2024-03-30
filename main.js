@@ -8,8 +8,9 @@ const fs = require('fs');
 const downloadsFolder = require('downloads-folder');
 const isOnline = require('on-line');
 
-let mainWindow, updateModal, quitConfirm, notificationWindow, collectionModal, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate, notificationQ = [], isNotificationShowing = false;
-let preferences = { "colorScheme": "dark", "discordRPC": true, "startup": false, "betaEnabled": false, "closeToTray": true, "menubarCollapsed": false, "libraryStyle": "grid", "librarySort": "nameAscending", "currentLibCollection": null }, collectionsData = {"favourites": [], "collections": {}};
+let mainWindow, updateModal, quitConfirm, notificationWindow, collectionModal, isAmoled = false, updateStatus = (statusobject) => { mainWindow.webContents.send('updateStatus', statusobject); }, tray, contextMenuHidden, contextMenuVisible, currentDownloads = [], onlineState, currentlydownloadedupdate, notificationQ = [], isNotificationShowing = false;
+let preferences = { "colorScheme": "dark", "discordRPC": true, "startup": false, "betaEnabled": false, "closeToTray": true, "menubarCollapsed": false, "libraryStyle": "grid", "librarySort": "nameAscending", "currentLibCollection": null }, collectionsData = { "favourites": [], "collections": {} };
+let achievements = { deadforge: { darkwasnotenough: { title:"Dark Was NOT Enough", description: "No, we do NOT have AMOLED dark mode.", achieved:false, date:null} } };
 function askToQuit() {
   /*let questionString = 'There '; questionString += Object.keys(currentDownloads).length == 1 ? 'is ' : 'are currently '; questionString += Object.keys(currentDownloads).length; questionString += Object.keys(currentDownloads).length == 1 ? ' item being downloaded:\n' : ' downloads being downloaded:\n'; questionString += currentDownloads.map(item => { const key = Object.keys(item)[0]; const value = item[key]; return `${value.string} ${value.version}`; }).join('\n'); questionString += '\n\nAre you sure you want to quit?'
   dialog.showMessageBox({
@@ -17,6 +18,7 @@ function askToQuit() {
     message: questionString,
     buttons: ['Yes', 'No']
   }).then((response) => { if (response.response == 0) { forceQuitAllowed = true; app.exit(); } })*/
+  if (isAmoled == true) { return; }
   createQuitQuestion();
   quitConfirm.on('ready-to-show', () => { quitConfirm.webContents.send('askToQuit', currentDownloads); quitConfirm.show(); });
   ipcMain.on('quitConfirmation', (event, arg) => { if (arg == true) { forceQuitAllowed = true; app.exit(); } else { quitConfirm.destroy(); } });
@@ -36,13 +38,14 @@ const createWindow = () => {
     height: mainWindowState.height,
     width: mainWindowState.width,
     frame: false,
+    fullscreen: false,
     contextisolation: false,
     nodeIntegration: true,
     titleBarStyle: 'hidden',
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      devTools: true
+      devtools: false
     }
   });
 
@@ -57,6 +60,7 @@ const createWindow = () => {
   ]);
 
   mainWindowState.manage(mainWindow);
+  mainWindow.setFullScreen(false)
 
   require("@electron/remote/main").enable(mainWindow.webContents);
 
@@ -151,7 +155,7 @@ const createCollectionModal = () => {
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
-      devTools: true
+      devtools: false
     },
     parent: mainWindow,
     modal: true,
@@ -180,69 +184,89 @@ if (!singleInstanceLock) {
 app.whenReady().then(() => {
   createWindow()
   setTimeout(() => {
-    fs.readFile(path.join(app.getPath('userData'), 'collections.json'), 'utf8', (err, data) => {
-      if (err) {
-        console.error('Error reading collections file:', err);
-      }
-
-      mainWindow.webContents.send('collections', data);
-      try {
-        Object.keys(JSON.parse(data)).forEach((key) => {
-          collectionsData[key] = JSON.parse(data)[key];
-        })
-      } catch { };
-      fs.readFile(path.join(app.getPath('userData'), 'preferences.json'), 'utf8', (err, data) => {
+    try {
+      fs.readFile(path.join(app.getPath('userData'), 'collections.json'), 'utf8', (err, data) => {
         if (err) {
-            console.error('Error reading preferences file:', err);
-            return;
+          console.error('Error reading collections file:', err);
         }
   
-        mainWindow.webContents.send('preferences', data);
-        Object.keys(JSON.parse(data)).forEach((key) => {
-          preferences[key] = JSON.parse(data)[key];
-        })
-        preferences.discordRPC ? connectRPC() : null;
-        if (preferences.closeToTray == true) {
-          tray = new Tray(process.platform == 'darwin' ? path.join(__dirname, 'res', 'DEADFORGE.icon.Template.png') : path.join(__dirname, 'res', 'DEADFORGE.icon.png'));
-          tray.setContextMenu(contextMenuVisible);
-        };
-        let forceQuitAllowed = false;
-        app.on('before-quit', (event) => {
-          if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) {
-            app.exit();
-            if (currentlydownloadedupdate != undefined) {
-              if (process.platform == "win32") { installerPathGoal = path.join(downloadsFolder(), 'update.exe'); }
-              else if (process.platform == "darwin") { installerPathGoal = path.join(downloadsFolder(), 'update.dmg'); }
-              else if (process.platform == "linux") { installerPathGoal = path.join(downloadsFolder(), 'update.deb'); }
-              shell.openExternal(installerPathGoal);
-            }}
-          else { event.preventDefault(); askToQuit(); }
-        })
-  
-        ipcMain.on('close', (event) => {
-          if (preferences == undefined || preferences.closeToTray == undefined) { app.quit()}
-          else if (!app.isQuiting && preferences.closeToTray == true) {
-            event.preventDefault();
-            mainWindow.hide(); 
-            tray.setContextMenu(contextMenuHidden);
-          } else {
-            if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { mainWindow.destroy(); }
-            else { event.preventDefault(); askToQuit(); }
+        mainWindow.webContents.send('collections', data);
+        try {
+          Object.keys(JSON.parse(data)).forEach((key) => {
+            collectionsData[key] = JSON.parse(data)[key];
+          })
+        } catch { };
+        fs.readFile(path.join(app.getPath('userData'), 'preferences.json'), 'utf8', (err, data) => {
+          if (err) {
+              console.error('Error reading preferences file:', err);
+              return;
           }
-        });
+    
+          mainWindow.webContents.send('preferences', data);
+          Object.keys(JSON.parse(data)).forEach((key) => {
+            preferences[key] = JSON.parse(data)[key];
+          })
+          preferences.discordRPC ? connectRPC() : null;
+          if (preferences.closeToTray == true) {
+            tray = new Tray(process.platform == 'darwin' ? path.join(__dirname, 'res', 'DEADFORGE.icon.Template.png') : path.join(__dirname, 'res', 'DEADFORGE.icon.png'));
+            tray.setContextMenu(contextMenuVisible);
+          };
   
-        mainWindow.on('close', (event) => {
-          if (!app.isQuiting && preferences.closeToTray == true) {
-            event.preventDefault();
-            mainWindow.hide(); 
-            tray.setContextMenu(contextMenuHidden);
-          } else {
-            if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { mainWindow.destroy(); }
+          fs.readFile(path.join(app.getPath('userData'), 'databases', 'achievements.json'), 'utf8', (err, data) => {
+            if (err) {
+              console.error('Error reading achievements file:', err);
+              return;
+            }
+            try {
+              Object.keys(JSON.parse(data)).forEach((game) => {
+                Object.keys(JSON.parse(data)[game]).forEach((key) => {
+                  achievements[game][key] = JSON.parse(data)[game][key]
+                })
+              })
+            }
+            catch { }
+          });
+          let forceQuitAllowed = false;
+          app.on('before-quit', (event) => {
+            if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) {
+              app.exit();
+              if (currentlydownloadedupdate != undefined) {
+                if (process.platform == "win32") { installerPathGoal = path.join(downloadsFolder(), 'update.exe'); }
+                else if (process.platform == "darwin") { installerPathGoal = path.join(downloadsFolder(), 'update.dmg'); }
+                else if (process.platform == "linux") { installerPathGoal = path.join(downloadsFolder(), 'update.deb'); }
+                shell.openExternal(installerPathGoal);
+              }}
             else { event.preventDefault(); askToQuit(); }
-          }
-        });
-    });
-    })
+          })
+    
+          ipcMain.on('close', (event) => {
+            if (preferences == undefined || preferences.closeToTray == undefined) { app.quit()}
+            else if (!app.isQuiting && preferences.closeToTray == true) {
+              event.preventDefault();
+              mainWindow.hide(); 
+              tray.setContextMenu(contextMenuHidden);
+            } else {
+              if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { mainWindow.destroy(); }
+              else { event.preventDefault(); askToQuit(); }
+            }
+          });
+    
+          mainWindow.on('close', (event) => {
+            if (!app.isQuiting && preferences.closeToTray == true) {
+              event.preventDefault();
+              mainWindow.hide(); 
+              tray.setContextMenu(contextMenuHidden);
+            } else {
+              if (Object.keys(currentDownloads).length == 0 || forceQuitAllowed == true) { mainWindow.destroy(); }
+              else { event.preventDefault(); askToQuit(); }
+            }
+          });
+      });
+      })
+    } catch (error) {
+      mainWindow.webContents.send('collections', collectionsData);
+      mainWindow.webContents.send('preferences', preferences);
+    }
     checkUpdates();
     setInterval(checkUpdates, 10 * 60 * 1000);
   }, 2500)
@@ -362,6 +386,7 @@ async function checkUpdates() {
     };
   
     dialog.showMessageBox(null, options).then((result) => { if (result.response == 0) { app.quit(); shell.openExternal(installerPath); }});*/
+    if (isAmoled == true) { return; }
     createUpdateModal(); updateModal.on('ready-to-show', () => { updateModal.webContents.send('updateVersion', latestversion); updateModal.show(); }); 
   }
 
@@ -510,6 +535,7 @@ function showNextNotification() {
   ipcMain.on('notificationclose', (event, notificationCallback) => {
     notificationWindow.destroy();
     if (notificationCallbacks[notificationCallback] != undefined && notificationCallback != null) { notificationCallbacks[notificationCallback](); }
+    if (notificationData.kill == true) { app.exit(); }
     showNextNotification();
   })
 }
@@ -586,4 +612,37 @@ ipcMain.on("toggleCollection", (event, game, collection) => {
     collectionsData.collections[collection].splice(collectionsData.collections[collection].indexOf(game), 1);
   }
   writeCollections();
+})
+
+ipcMain.on("refresh", (event) => {
+  app.relaunch();
+  app.quit();
+})
+
+// Function to award the achievement
+function awardAchievement(game, name, kill) {
+
+  if (!(name in achievements[game])) {
+      console.error('Achievement ID not found in data:', name);
+      return;
+  } else if (achievements[game][name].achieved == true) {
+      console.error('Achievement already achieved:', name);
+      return;
+  }
+  achievements[game][name].achieved = true;
+  achievements[game][name].date = new Date().toISOString();
+
+  fs.writeFileSync(path.join(app.getPath('userData'), 'databases', 'achievements.json'), JSON.stringify(achievements));
+
+  createNotification({ "title": "Achievement Unlocked!", "heading": achievements[game][name].title, "message": achievements[game][name].description, "kill" : kill });
+}
+
+ipcMain.on("achievement", (event, game, name, kill) => {
+  awardAchievement(game, name, kill);
+  mainWindow.destroy();
+})
+
+ipcMain.on("amoledmode", (event) => {
+  mainWindow.setFullScreen(true);
+  isAmoled = true;
 })

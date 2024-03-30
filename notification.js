@@ -14,6 +14,7 @@ ipcRenderer.on('notification', (event, notification) => {
     console.log(notification);
     const title = notification.title;
     const message = notification.message;
+    const heading = notification.heading;
     const actionA = notification.actionA && notification.actionA.message ? notification.actionA : null;
     const actionB = notification.actionB && notification.actionB.message ? notification.actionB : null;
 
@@ -28,6 +29,10 @@ ipcRenderer.on('notification', (event, notification) => {
     if (actionB != null) {
         document.querySelector('button#notificationbuttonB').textContent = actionB.message;
         notificationActionB = () => { closeNotification(actionB.callbackFn) };
+    }
+
+    if (heading != null) {
+        document.querySelector('div#notificationinfoheading').textContent = heading;
     }
 })
 

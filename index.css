@@ -233,6 +233,12 @@ div#content[current="library"]>section#library {
     overflow-y: auto;
 }
 
+div#content[current="game"]>section#game {
+    display: block;
+    height: 100%;
+    overflow-y: auto;
+}
+
 div#updatestatus[status="checking"]::after, section#settings div#updatestatusSETTINGS[status="checking"]::after {
     content: "sync";
 }
@@ -750,26 +756,56 @@ section#library[viewstyle="banner"]>games>gamesection>info>* {
     text-align: center;
 }
 
-section#library[viewstyle="banner"]>games>gamesection>info::before {
+html.dark section#library[viewstyle="banner"]>games>gamesection>info::before {
     background-image: linear-gradient(360deg, rgba(0,0,0,0.75), transparent);
     height: 50px;
     width: 100%;
     content: ""
 }
 
-section#library[viewstyle="banner"]>games>gamesection>info>:first-child {
+html.dark section#library[viewstyle="banner"]>games>gamesection>info>:first-child {
     background-image: linear-gradient(180deg, rgba(0,0,0,0.75), black);
 }
 
-section#library[viewstyle="banner"]>games>gamesection>info>:not(:first-child) {
+html.dark section#library[viewstyle="banner"]>games>gamesection>info>:not(:first-child) {
     background: black;
 }
 
-section#library[viewstyle="banner"]>games>gamesection>info::after {
+html.dark section#library[viewstyle="banner"]>games>gamesection>info::after {
     width: 100%;
     background: black;
     content: "";
     height: 42px;
+}
+
+html.dark section#library[viewstyle="banner"]>games>gamesection>info {
+    color: #F0F0F0;
+}
+
+html.light section#library[viewstyle="banner"]>games>gamesection>info::before {
+    background-image: linear-gradient(360deg, rgba(255,255,255,0.75), transparent);
+    height: 50px;
+    width: 100%;
+    content: ""
+}
+
+html.light section#library[viewstyle="banner"]>games>gamesection>info>:first-child {
+    background-image: linear-gradient(180deg, rgba(255,255,255,0.75), white);
+}
+
+html.light section#library[viewstyle="banner"]>games>gamesection>info>:not(:first-child) {
+    background: white;
+}
+
+html.light section#library[viewstyle="banner"]>games>gamesection>info::after {
+    width: 100%;
+    background: white;
+    content: "";
+    height: 42px;
+}
+
+html.light section#library[viewstyle="banner"]>games>gamesection>info {
+    color: #0F0F0F;
 }
 
 gamesection button, gamesection a:has(button), gamesection>blank {
@@ -782,6 +818,7 @@ gamesection button, gamesection a:has(button), gamesection>blank {
     font-family: 'Uni Sans CAPS';
     font-weight: bold;
     text-align: center;
+    cursor: pointer;
 }
 
 gamesection button.disabled, contextmenu>menuaction.disabled {
@@ -1423,4 +1460,149 @@ div#promptinput {
 span#error {
     display: flex;
     align-items: center;
+}
+
+
+.game-info {
+    flex: 1;
+    background-color: #f2f2f2;
+    padding: 12px;
+    text-align: center;
+    display: flex;
+    flex-direction: row;
+    border-radius: 0px 0px 16px 16px;
+    z-index: 1;
+    position: relative;
+    column-gap: 32px;
+    flex-wrap: wrap;
+    row-gap: 16px;
+}
+
+.game-stats {display: flex;column-gap: 24px;flex-wrap: wrap;justify-content: center;row-gap: 16px;}
+
+div.game-links ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    font-family: 'Uni Sans CAPS';
+}
+
+div.game-links li {
+    padding: 8px;
+}
+
+div.game-links li:not(:last-of-type)::after {
+    content: "·";
+    margin-left: 16px;
+}
+
+div.game-links a {
+    text-decoration: none;
+    color: #F0F0F0;
+    padding: 8px;
+    border-radius: 8px;
+    transition: background 0.25s ease-in-out;
+}
+
+div.game-links a:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+section#game>subsection#conrpg>div.banner {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    background: url(res/CONRPG.banner.png);
+    height: 350px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-start;
+    color: transparent;
+    font-size: min(96px, 8vw);
+    padding: 4px 16px;
+}
+
+section#game>subsection#restorebackup>div.banner {
+    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+    background: url(res/RESTOREBACKUP.banner.png);
+    height: 350px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    justify-content: flex-start;
+    color: transparent;
+    font-size: min(96px, 7vw);
+    padding: 4px 16px;
+}
+
+section#game>subsection>div.banner>span {
+    background: linear-gradient(360deg, #aaa, white);
+    background-clip: text;
+}
+
+button#playButton {all: unset;color: #F0F0F0;background: #0F0F0F;width: 150px;height: 75px;border-radius: 15px;font-family: 'Uni Sans CAPS';font-weight: bold;text-align: center;}
+
+div.gamestats {
+    display: flex;
+    top: -4px;
+    position: relative;
+    align-items: center;
+}
+
+.gamestattitle {
+    font-family: 'Uni Sans CAPS';
+    font-weight: bold;
+    font-size: 32px;
+}
+
+.gamestattext {
+    text-align: left;
+}
+
+.gamestatvalue {
+    font-size: 16px;
+    font-weight: 500;
+    font-family: 'Montserrat';
+}
+
+.gamestaticon {
+    font-size: 44px;
+    position: relative;
+    font-variation-settings: 'FILL' 0, 'wght' 700, 'GRAD' -25, 'opsz' 20;
+}
+
+.gamestaticon:not(:empty) {
+    padding-right: 8px;
+}
+
+.game-links {
+    display: flex;
+    flex-direction: row;
+    margin-top: -16px;
+    z-index: 0;
+    position: relative;
+    padding: 16px;
+    padding-top: 32px;
+    background: #0F0F0F;
+    color: #F0F0F0;
+    border-radius: 0 0 16px 16px;
+    align-items: center;
+}
+
+section#game[game="conrpg"]>subsection:not(#conrpg) {
+    display: none;
+}
+
+section#game[game="restorebackup"]>subsection:not(#restorebackup) {
+    display: none;
+}
+
+@media (max-width: 1265px) {
+  section#game > subsection > div.game-info {
+    justify-content: center;
+  }
 }

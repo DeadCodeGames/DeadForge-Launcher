@@ -71,6 +71,13 @@ div#notificationinfotitle {
     margin-bottom: 4px;
 }
 
+div#notificationinfoheading {
+    font-weight: bold;
+    font-family: "Montserrat";
+    margin-bottom: 4px;
+    font-size: 14px;
+}
+
 div#notificationinfo {
     font-family: 'Montserrat';
     font-size: 12px;
