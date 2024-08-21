@@ -1,0 +1,21 @@
+* {
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+html:has(div#updatestatus[status="appnotloaded"]){
+    pointer-events: none;
+    opacity: 0;
+}
+
+html:not(:has(div#updatestatus[status="appnotloaded"])) {
+    opacity: 1;
+}
+
+html {
+    transition: opacity 0.5s ease-in-out;
+}
+
+body {
+    margin: 0;
+}
